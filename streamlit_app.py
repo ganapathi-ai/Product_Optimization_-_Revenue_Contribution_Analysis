@@ -33,25 +33,33 @@ st.markdown("---")
 # ============================================================================
 # SIDEBAR FILTERS (PRD REQUIREMENT: Comprehensive Filtering)
 # ============================================================================
-st.sidebar.header("🔍 FILTERS")
+st.sidebar.header("🔍 Filters")
 
 # Filter 1: Product Category Filter (Multi-select)
 selected_categories = st.sidebar.multiselect(
     "📦 Product Category",
+    options=sorted(df['product_category'].unique()),
+    default=sorted(df['product_category'].unique()),
+    key="category_filter",
+    help="Filter by product category"
+)
+
+selected_types = st.sidebar.multiselect(
+    "🏷️ Product Type",
     options=sorted(df['product_category'].unique()),
     default=sorted(df['product_category'].unique())
 )
 
 # Filter 2: Product Type Filter (Multi-select)
 selected_types = st.sidebar.multiselect(
-    "🏷️ Product Type",
+    "Product Type",
     options=sorted(df['product_type'].unique()),
     default=sorted(df['product_type'].unique())
 )
 
 # Filter 3: Store Location Selector (Multi-select)
 selected_stores = st.sidebar.multiselect(
-    "🏪 Store Location",
+    "Store Location",
     options=['All Stores', 'Astoria', 'Hell\'s Kitchen', 'Lower Manhattan'],
     default='All Stores'
 )
@@ -134,7 +142,7 @@ with col3:
 with col4:
     st.metric("📊 Avg Efficiency", f"{filtered_df['efficiency_score'].mean():.3f}")
 with col5:
-    st.metric("📈 Avg Volume", f"{filtered_df['total_units_sold'].mean():,.0f}")
+    st.metric("📈 Avg Volume", f"{filtered_df['total_units_sold'].mean():,.0f}"))
 
 st.markdown("---")
 
@@ -148,6 +156,8 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📊 Pareto Analysis",
     "🏪 Store Performance",
     "🔍 Product Details",
+    "📥 Data Export"
+])
     "📋 Consolidated Data"
 ])
 
@@ -645,61 +655,18 @@ with tab7:
                         help="20-page MIT-level research manuscript"
                     )
             else:
-                st.info("📄 Research paper not available (run: `python generate_comprehensive_manuscript.py`)", icon="ℹ️")
+                st.markdown("**Research Manuscript:** Not available in current environment")
         except Exception as e:
-            st.warning(f"📄 Could not load research paper: {str(e)}", icon="⚠️")
+            st.markdown(f"**Note:** Could not load research paper ({str(e)})")
 
 # ============================================================================
-# FOOTER & ABOUT SECTION
+# FOOTER
 # ============================================================================
-st.markdown("---")
-
-col1, col2, col3 = st.columns([1, 2, 1])
-
-with col1:
-    st.markdown("#### 📊 Dashboard Features")
-    st.markdown("""
-    • Product Rankings
-    • Revenue Analysis
-    • Popularity vs Revenue
-    • Pareto Analysis
-    • Store Performance
-    • Product Drill-Down
-    • Data Export
-    """)
-
-with col2:
-    st.markdown("#### 📈 Dataset Summary")
-    total_transactions = int(df.get('transaction_count', [0]).sum() if 'transaction_count' in df.columns else 0)
-    total_products = len(df)
-    total_stores = 3
-    total_revenue = df['total_revenue'].sum()
-    
-    st.markdown(f"""
-    **Afficionado Coffee Roasters Product Optimization**
-    
-    - 📦 {total_products} Products Analyzed
-    - 🏪 {total_stores} Store Locations
-    - 💰 ${total_revenue:,.0f} Total Revenue
-    - 📊 Comprehensive Performance Analytics
-    """)
-
-with col3:
-    st.markdown("#### 🔧 PRD Compliance")
-    st.markdown("""
-    ✅ Module 1: Rankings
-    ✅ Module 2: Revenue
-    ✅ Module 3: Popularity
-    ✅ Module 4: Pareto
-    ✅ Module 5: Stores
-    ✅ Module 6: Drill-Down
-    ✅ Module 7: Export
-    """)
-
 st.markdown("---")
 st.markdown(
-    "<div style='text-align: center; color: #999; font-size: 0.9em;'>"
-    "🔬 Afficionado Coffee Roasters | Product Optimization Analysis Dashboard | PRD-Compliant Implementation"
+    "<div style='text-align: center; color: #999; font-size: 0.85em;'>"
+    "Afficionado Coffee Roasters | Product Portfolio Analysis Dashboard<br/>"
+    "Comprehensive performance metrics and data-driven recommendations"
     "</div>",
     unsafe_allow_html=True
 )
