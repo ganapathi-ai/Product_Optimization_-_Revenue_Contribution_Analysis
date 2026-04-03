@@ -44,22 +44,17 @@ selected_categories = st.sidebar.multiselect(
     help="Filter by product category"
 )
 
-selected_types = st.sidebar.multiselect(
-    "🏷️ Product Type",
-    options=sorted(df['product_category'].unique()),
-    default=sorted(df['product_category'].unique())
-)
-
 # Filter 2: Product Type Filter (Multi-select)
 selected_types = st.sidebar.multiselect(
-    "Product Type",
+    "🏷️ Product Type",
     options=sorted(df['product_type'].unique()),
-    default=sorted(df['product_type'].unique())
+    default=sorted(df['product_type'].unique()),
+    help="Filter by product type"
 )
 
 # Filter 3: Store Location Selector (Multi-select)
 selected_stores = st.sidebar.multiselect(
-    "Store Location",
+    "🏪 Store Location",
     options=['All Stores', 'Astoria', 'Hell\'s Kitchen', 'Lower Manhattan'],
     default='All Stores'
 )
