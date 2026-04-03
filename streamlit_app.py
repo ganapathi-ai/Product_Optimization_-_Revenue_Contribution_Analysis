@@ -613,7 +613,7 @@ with tab7:
     st.markdown("---")
     
     # Download buttons
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
     
     with col1:
         csv = filtered_df.to_csv(index=False)
@@ -634,30 +634,6 @@ with tab7:
             mime="text/csv",
             help="Download all 80 products as CSV"
         )
-    
-    with col3:
-        try:
-            # Cloud-compatible file path handling
-            script_dir = Path(__file__).parent if '__file__' in dir() else Path.cwd()
-            docx_path = script_dir / 'RESEARCH_PAPER_MANUSCRIPT_20PAGE.docx'
-            
-            # Try alternate path if running from different directory
-            if not docx_path.exists():
-                docx_path = Path('RESEARCH_PAPER_MANUSCRIPT_20PAGE.docx')
-            
-            if docx_path.exists():
-                with open(docx_path, "rb") as file:
-                    st.download_button(
-                        label="📄 Download Research Paper (MS Word)",
-                        data=file,
-                        file_name="Afficionado_Product_Analysis_Research_Paper.docx",
-                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                        help="20-page MIT-level research manuscript"
-                    )
-            else:
-                st.markdown("**Research Manuscript:** Not available in current environment")
-        except Exception as e:
-            st.markdown(f"**Note:** Could not load research paper ({str(e)})")
 
 # ============================================================================
 # FOOTER
