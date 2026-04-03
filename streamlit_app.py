@@ -142,7 +142,7 @@ with col3:
 with col4:
     st.metric("📊 Avg Efficiency", f"{filtered_df['efficiency_score'].mean():.3f}")
 with col5:
-    st.metric("📈 Avg Volume", f"{filtered_df['total_units_sold'].mean():,.0f}"))
+    st.metric("📈 Avg Volume", f"{filtered_df['total_units_sold'].mean():,.0f}")
 
 st.markdown("---")
 
@@ -157,8 +157,6 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "🏪 Store Performance",
     "🔍 Product Details",
     "📥 Data Export"
-])
-    "📋 Consolidated Data"
 ])
 
 # ============================================================================
