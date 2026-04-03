@@ -24,7 +24,7 @@ The project applies established analytical frameworks to optimize product portfo
 | **Retail Locations** | 3 |
 | **Total Revenue** | $698,812 |
 | **Performance Metrics** | 25+ |
-| **Deliverable** | MIT/Harvard Research Manuscript |
+
 
 ---
 
