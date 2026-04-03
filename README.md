@@ -214,8 +214,8 @@ Afficionado_Coffee_Roasters/
 │   ├── CODE_ANALYSIS.md                   (Technical guide)
 │   └── TRANSFORMATION_LOGIC.md            (Data methodology)
 │
-├── RESEARCH & ANALYSIS
-│   ├── RESEARCH_PAPER_MANUSCRIPT_20PAGE.docx
+├── ANALYSIS DASHBOARD
+│ 
 │   └── streamlit_app.py                   (Interactive dashboard)
 │
 ├── DATA
@@ -398,8 +398,6 @@ Afficionado_Coffee_Roasters/
 - Quarterly strategy adjustment
 
 ---
-
-
 ## 🛠️ Technical Stack
 
 ### Core Analytics
@@ -416,74 +414,6 @@ Afficionado_Coffee_Roasters/
 ### Data Processing
 - **Openpyxl** – Excel file handling
 - **CSV Processing** – Data export capabilities
-
----
-
-
-## 📚 Documentation
-
-| Document | Purpose | Audience |
-|----------|---------|----------|
-| **README.md** | Project overview & quick start | Everyone |
-| **CODE_ANALYSIS.md** | Technical implementation details | Developers |
-| **TRANSFORMATION_LOGIC.md** | Data transformation procedures | Data Scientists |
-| **RESEARCH_PAPER_MANUSCRIPT_20PAGE.docx** | Complete academic research | Executives |
-
----
-
-
-## 📌 Key Deliverables
-
-### 1. Research Manuscript ✓
-- **File:** `RESEARCH_PAPER_MANUSCRIPT_20PAGE.docx`
-- **Format:** Microsoft Word (18-22 pages)
-- **Standard:** MIT/Harvard academic level
-- **Ready for:** Distribution, publication, presentation
-
-### 2. Interactive Dashboard ✓
-- **File:** `streamlit_app.py`
-- **Features:** 7 analysis modules, 10+ visualizations
-- **Filters:** 8 dynamic dimension filters
-- **Metrics:** 25+ KPI calculations
-
-### 3. Technical Documentation ✓
-- **CODE_ANALYSIS.md** – Architecture guide (706 lines)
-- **TRANSFORMATION_LOGIC.md** – Data methodology
-- **README.md** – Project overview
-
-### 4. Analytical Datasets ✓
-- **80 products** with 25 metrics each
-- **4 CSV files** with different aggregations
-- **Full traceability** to source data
-
-### 5. Code Repository ✓
-- **GitHub:** Public repository
-- **Production-ready:** Cloud compatible
-- **Complete:** All dependencies included
-
----
-
-
-## ✅ Quality Assurance
-
-### Code Quality
-- ✓ 706 lines of clean, documented code
-- ✓ Comprehensive error handling
-- ✓ Cloud deployment verified
-- ✓ Performance optimized
-
-### Data Integrity
-- ✓ All null values validated (0 found)
-- ✓ Duplicate detection (0 found)
-- ✓ Range validation on all metrics
-- ✓ Cross-location reconciliation
-
-### Documentation
-- ✓ Complete API documentation
-- ✓ Technical implementation guide
-- ✓ User guide with screenshots
-- ✓ Research manuscript
-
 ---
 
 
@@ -500,15 +430,4 @@ Afficionado_Coffee_Roasters/
 ---
 
 
-## 📞 Support
 
-For questions or issues:
-
-1. **Setup Problems?** → Check Installation section
-2. **Dashboard Issues?** → See CODE_ANALYSIS.md
-3. **Data Questions?** → Review TRANSFORMATION_LOGIC.md
-4. **Academic Use?** → Reference RESEARCH_PAPER_MANUSCRIPT_20PAGE.docx
-
----
-
-**Ready to analyze your product portfolio. Get started below.** ⬇️
