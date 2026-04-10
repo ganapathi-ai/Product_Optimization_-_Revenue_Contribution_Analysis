@@ -1,430 +1,118 @@
-# Product Optimization & Revenue Contribution Analysis
+# Product Optimization and Revenue Contribution Analysis
 
 ## Afficionado Coffee Roasters
 
+This repository contains the data, code, and manuscript document for a product portfolio analysis of Afficionado Coffee Roasters. The project examines revenue concentration, product performance, and store-level variation using transaction-level point-of-sale data.
 
----
+## Overview
 
-## 📊 Executive Summary
+The analysis is based on a 2025 transactional dataset covering:
 
-This repository contains a **comprehensive data science analysis** of product performance and revenue contribution for Afficionado Coffee Roasters. 
+- 149,116 transactions
+- 80 products
+- 9 product categories
+- 3 retail locations
+- $698,812.33 in total revenue
 
-The project applies established analytical frameworks to optimize product portfolio performance across three retail locations:
-- **Pareto Analysis** (80/20 Rule)
-- **Menu Engineering Principles**
-- **Revenue Concentration Metrics**
+The project was designed to support:
 
+- product-level performance assessment
+- Pareto revenue concentration analysis
+- category and store comparison
+- manuscript review alongside verified project outputs
 
-### Project Scope
+## Repository Contents
 
-| Metric | Value |
-|--------|-------|
-| **Transactions Analyzed** | 149,116 |
-| **Products Evaluated** | 80 |
-| **Retail Locations** | 3 |
-| **Total Revenue** | $698,812 |
-| **Performance Metrics** | 25+ |
+### Core Files
 
+- `streamlit_app.py`
+  Interactive dashboard for product, category, store, and Pareto analysis.
+- `requirements.txt`
+  Python dependencies for the project.
 
----
+### Documentation
 
+- `README.md`
+  Repository overview and usage instructions.
+- `TRANSFORMATION_LOGIC.md`
+  Data transformation and feature-engineering documentation.
+- `CODE_ANALYSIS.md`
+  Technical description of the dashboard structure and logic.
 
-## 🎯 Project Objectives
+### Data
 
-### Primary Goals
+- `data/Afficionado Coffee Roasters.xlsx`
+  Raw transaction-level workbook.
+- `data/CONSOLIDATED_ANALYSIS.csv`
+  Product-level analytical dataset.
+- `data/CATEGORY_SUMMARY.csv`
+  Category-level revenue and volume summary.
+- `data/STORE_SUMMARY.csv`
+  Store-level revenue and transaction summary.
+- `data/SUMMARY_STATISTICS.csv`
+  High-level portfolio statistics.
 
-✓ **Identify Performance Patterns**
-  - Top-performing and underperforming products
-  - Revenue vs. volume mismatches
-  - Product efficiency insights
+### Manuscript Output
 
-✓ **Quantify Revenue Contribution**
-  - By-product revenue analysis
-  - Category-level performance
-  - Data-driven decision support
+- `RESEARCH_PAPER_MANUSCRIPT_20PAGE.docx`
+  Generated manuscript document.
 
-✓ **Apply Pareto Analysis**
-  - Revenue concentration measurement
-  - Optimal product portfolio sizing
-  - Menu optimization recommendations
+## Analytical Scope
 
+The repository applies a structured product analytics workflow that includes:
 
-### Secondary Goals
+- revenue calculation from transaction quantity and unit price
+- product-level aggregation of revenue, volume, and transaction frequency
+- category-level and store-level summaries
+- Pareto classification based on cumulative revenue contribution
+- a weighted efficiency score using normalized revenue and normalized volume
+- popularity-versus-revenue quadrant analysis
 
-✓ Support menu simplification and SKU rationalization
+## Key Results
 
-✓ Identify "hero" products for strategic promotion
+Selected verified findings include:
 
-✓ Highlight low-performing items for portfolio review
+- 42 products account for 79.25% of total revenue
+- the remaining 38 products account for 20.75% of total revenue
+- Coffee is the leading category at 38.63% of revenue
+- Tea contributes 28.11% of revenue
+- Hell's Kitchen has the highest total store revenue
+- Lower Manhattan has the highest average revenue per transaction
 
-✓ Enable operational efficiency improvements across stores
-
----
-
-
-## 📈 Key Findings
-
-### Revenue Concentration
-
-| Finding | Value | Interpretation |
-|---------|-------|-----------------|
-| **Pareto Threshold** | 42 products | Required for 80% of revenue |
-| **Portfolio Share** | 52.5% | 42 of 80 products in core group |
-| **Top 10 Contribution** | 25.38% | Revenue concentration in top tier |
-| **Long-tail Impact** | 6.04% | 22 products contribute minimal revenue |
-
-
-### Category Performance
-
-| Category | Revenue | Market Share | Status |
-|----------|---------|--------------|--------|
-| **Coffee** | $269,952 | 38.63% | Market Leader |
-| **Tea** | $196,406 | 28.11% | Strong Secondary |
-| **Bakery** | $82,316 | 11.78% | Emerging |
-| **Drinking Chocolate** | $72,416 | 10.36% | Niche |
-
-
-### Product Efficiency
-
-**High Performers:**
-- Large-size premium beverages
-- Efficiency score > 0.9
-- Recommend: Scale and promote
-
-**Low Performers:**
-- Loose tea and packaged goods
-- Efficiency score < 0.05
-- Recommend: Consolidate or discontinue
-
-
-### Geographic Distribution
-
-| Location | Revenue | Performance |
-|----------|---------|------------|
-| **Hell's Kitchen** | $236,511 | Highest absolute revenue |
-| **Astoria** | $232,244 | Consistent performer |
-| **Lower Manhattan** | $230,057 | Highest per-transaction average |
-
-**Variance:** < 3% across locations (highly consistent)
-
----
-
-
-## 🔬 Analytical Methodology
-
-### Seven-Phase Analytical Framework
-
-**Phase 1: Data Ingestion & Validation**
-- Load transaction-level data from source files
-- Validate product identifiers, pricing, quantities
-- Perform integrity checks and quality assurance
-
-**Phase 2: Revenue Computation**
-- Calculate: `revenue = transaction_qty × unit_price`
-- Aggregate by product, category, location
-- Generate transaction counts and volume metrics
-
-**Phase 3: Product Popularity Analysis**
-- Rank products by transaction volume
-- Identify top and bottom performers
-- Analyze volume-to-revenue ratios
-
-**Phase 4: Revenue Contribution Analysis**
-- Calculate revenue share percentages
-- Identify revenue anchors and long-tail products
-- Analyze category interdependencies
-
-**Phase 5: Pareto Analysis**
-- Apply 80/20 rule
-- Determine optimal portfolio size
-- Calculate cumulative revenue distributions
-
-**Phase 6: Efficiency Scoring**
-- Develop composite metric
-- Formula: `efficiency = (revenue_weight × 0.6) + (volume_weight × 0.4)`
-- Normalize scores to 0-1 range
-
-**Phase 7: Strategic Recommendations**
-- Generate actionable insights
-- Menu optimization strategies
-- Inventory and pricing recommendations
-
----
-
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-```
-✓ Python 3.8 or higher
-✓ pip package manager
-```
-
-
-### Installation
+## Installation
 
 ```bash
-# Clone repository
 git clone https://github.com/ganapathi-ai/Product_Optimization_-_Revenue_Contribution_Analysis.git
-
-# Navigate to directory
 cd Afficionado_Coffee_Roasters
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
+## Usage
 
-### Run Analysis
-
-```bash
-# Regenerate the research manuscript
-python generate_paper.py
-```
-
-
-### Launch Dashboard
+### Launch the Dashboard
 
 ```bash
-# Start interactive web application
 streamlit run streamlit_app.py
 ```
 
-Then open: **http://localhost:8501**
+## Reproducibility Notes
 
+- The raw source workbook is included in `data/`.
+- The derived CSV outputs correspond to the analytical summaries used by the dashboard and manuscript.
+- The manuscript document is included directly in the repository.
+- Supporting methodological details are documented in `TRANSFORMATION_LOGIC.md`.
 
-### Generate Research Manuscript
+## Recommended Reading Order
 
-```bash
-# Create comprehensive analysis document
-python generate_paper.py
-```
+For researchers reviewing the repository, the suggested order is:
 
----
+1. `README.md`
+2. `TRANSFORMATION_LOGIC.md`
+3. `data/SUMMARY_STATISTICS.csv`
+4. `data/CONSOLIDATED_ANALYSIS.csv`
+5. `streamlit_app.py`
+6. `RESEARCH_PAPER_MANUSCRIPT_20PAGE.docx`
 
+## License and Use
 
-## 📁 Project Structure
-
-```
-Afficionado_Coffee_Roasters/
-
-├── DOCUMENTATION
-│   ├── README.md                          ← You are here
-│   ├── CODE_ANALYSIS.md                   (Technical guide)
-│   └── TRANSFORMATION_LOGIC.md            (Data methodology)
-│
-├── ANALYSIS DASHBOARD
-│ 
-│   └── streamlit_app.py                   (Interactive dashboard)
-│
-├── DATA
-│   ├── data/CONSOLIDATED_ANALYSIS.csv     (80 products, 25 metrics)
-│   ├── data/CATEGORY_SUMMARY.csv          (Category aggregations)
-│   ├── data/STORE_SUMMARY.csv             (Store performance)
-│   └── data/SUMMARY_STATISTICS.csv        (Key statistics)
-│
-├── CONFIGURATION
-│   ├── requirements.txt                   (Python dependencies)
-│   ├── .gitignore
-│   └── .streamlit/config.toml
-│
-└── CORE SCRIPTS
-    ├── generate_paper.py
-    └── streamlit_app.py
-```
-
----
-
-
-## 📊 Dashboard Features
-
-### Interactive Analysis Modules
-
-**1. Product Rankings**
-- Top and bottom performers
-- Volume and revenue sorting
-- Performance metrics
-
-**2. Revenue Contribution**
-- Revenue concentration visualization
-- Contribution tables
-- Category breakdown
-
-**3. Popularity vs Revenue**
-- Quadrant analysis
-- Performance comparison
-- Volume-revenue balance
-
-**4. Pareto Analysis**
-- 80/20 rule visualization
-- Cumulative revenue curve
-- Concentration metrics
-
-**5. Store Performance**
-- Cross-location comparison
-- Geographic analysis
-- Performance benchmarking
-
-**6. Product Detail View**
-- Drill-down analysis
-- Individual product metrics
-- Performance history
-
-**7. Data Export**
-- Report generation
-- CSV download
-- DOCX export
-
-
-### Interactive Features
-
-| Feature | Description |
-|---------|-------------|
-| **Multi-Select Filters** | Location, category, product range |
-| **Dynamic Metrics** | 25+ KPIs calculated in real-time |
-| **Interactive Charts** | 10+ Plotly visualizations |
-| **Export Options** | CSV, DOCX, web view |
-
----
-
-
-## 📊 Key Performance Indicators (KPIs)
-
-| KPI | Value | Interpretation |
-|-----|-------|-----------------|
-| **Top Product Share** | 3.03% | Single product revenue concentration |
-| **Category Dominance** | 38.63% | Coffee category market leadership |
-| **Top 10 Contribution** | 25.38% | Revenue top-tier concentration |
-| **Portfolio Efficiency** | 0.476 avg | Average product efficiency score |
-| **Pareto Threshold** | 42 products | Products for 80% revenue target |
-| **Revenue Base** | $698,812 | Total annual revenue analyzed |
-| **Transaction Volume** | 149,116 | Total transactions in dataset |
-
----
-
-
-## 💡 Strategic Recommendations
-
-### Menu Optimization
-
-**Reduce Portfolio Complexity**
-- Current: 80 products
-- Target: 60-65 products (-18-20%)
-- Action: Discontinue 22 long-tail products (< 0.5% revenue each)
-
-**Focus on Core Portfolio**
-- Maintain: Top 42 "hero" products (80% revenue)
-- Promote: These products across all locations
-- Outcome: Simplified menu, improved operational efficiency
-
-
-### Category Strategy
-
-**Leverage Strengths**
-- Coffee + Tea: 66.74% combined revenue
-- Maintain growth investment here
-- Explore premium upsell opportunities
-
-**Expand Opportunities**
-- Drinking Chocolate: High efficiency potential
-- Consider product line expansion
-- Test new premium offerings
-
-**Consolidate Weaknesses**
-- Loose Tea: Low efficiency performance
-- Bakery: Consider supplier consolidation
-- Evaluate discontinuation options
-
-
-### Operational Excellence
-
-**Standardize Best Practices**
-- Replicate top-performing store strategies
-- Consistent inventory across locations
-- Unified pricing strategies
-
-**Optimize Inventory**
-- Prioritize high-efficiency products
-- Reduce SKU complexity
-- Implement JIT ordering for core items
-
-**Dynamic Pricing**
-- Premium pricing for hero products
-- Promotional pricing for slow-movers
-- Bundle pricing for complementary items
-
-
-### Revenue Growth Initiatives
-
-**Upsell Strategies**
-- Promote large-size premium beverages
-- Cross-sell complementary products
-- Test bundled offerings
-
-**Loyalty Program**
-- Focus on top 20 revenue products
-- Tiered rewards system
-- Personalized recommendations
-
-**Promotional Calendar**
-- Seasonal product rotation
-- Category-specific promotions
-- Location-based campaigns
-
----
-
-
-## 📈 Implementation Roadmap
-
-### Week 1-2: Hero Product Focus
-- Optimize promotion strategy
-- Implement premium pricing
-- Staff training on hero products
-
-### Week 3-6: Menu Optimization
-- SKU rationalization
-- Supplier negotiations
-- Implementation planning
-
-### Week 7-12: Operational Excellence
-- Process standardization
-- Inventory system updates
-- Cross-store training
-
-### Ongoing: Continuous Improvement
-- Weekly performance monitoring
-- Monthly trend analysis
-- Quarterly strategy adjustment
-
----
-## 🛠️ Technical Stack
-
-### Core Analytics
-- **Python 3.8+** – Programming language
-- **Pandas** – Data manipulation and analysis
-- **NumPy** – Numerical computing
-- **Scikit-learn** – Machine learning algorithms
-
-### Visualization & Reporting
-- **Plotly** – Interactive visualizations
-- **Streamlit** – Web application framework
-- **Python-docx** – Word document generation
-
-### Data Processing
-- **Openpyxl** – Excel file handling
-- **CSV Processing** – Data export capabilities
----
-
-
-## 📍 Repository Information
-
-**GitHub:** https://github.com/ganapathi-ai/Product_Optimization_-_Revenue_Contribution_Analysis
-
-**Status:** ✅ Production Ready
-
-**Last Updated:** April 2026
-
-**License:** Open Source
-
----
+This repository is intended for research, academic review, and reproducibility of the accompanying analysis.

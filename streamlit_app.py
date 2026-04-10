@@ -200,6 +200,43 @@ st.markdown("""
         color: #1A0A00 !important;
     }
 
+    div[data-testid="stMetric"] {
+        background: linear-gradient(180deg, #FFFDF9 0%, #F9EFD9 100%);
+        border: 2px solid #D4A96A;
+        border-radius: 12px;
+        padding: 14px 16px;
+        box-shadow: 0 4px 12px rgba(111, 78, 55, 0.10);
+    }
+    div[data-testid="stMetricLabel"] {
+        margin-bottom: 0.35rem;
+    }
+    div[data-testid="stMetricLabel"] p,
+    div[data-testid="stMetricLabel"] div,
+    div[data-testid="stMetricLabel"] span {
+        color: #2C1005 !important;
+        font-size: 1.08rem !important;
+        font-weight: 800 !important;
+        line-height: 1.25 !important;
+        letter-spacing: 0.01em;
+    }
+    div[data-testid="stMetricValue"] {
+        color: #1A0A00 !important;
+    }
+    div[data-testid="stMetricValue"] p,
+    div[data-testid="stMetricValue"] div,
+    div[data-testid="stMetricValue"] span {
+        color: #1A0A00 !important;
+        font-size: 1.7rem !important;
+        font-weight: 800 !important;
+        line-height: 1.05 !important;
+    }
+    div[data-testid="stMetricDelta"] p,
+    div[data-testid="stMetricDelta"] div,
+    div[data-testid="stMetricDelta"] span {
+        font-size: 0.98rem !important;
+        font-weight: 700 !important;
+    }
+
     [data-testid="stSidebar"] [data-baseweb="select"] > div {
         background-color: rgba(255, 248, 240, 0.14) !important;
         border: 1px solid #D4A96A !important;
