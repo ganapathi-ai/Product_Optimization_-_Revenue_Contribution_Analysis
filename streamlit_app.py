@@ -192,6 +192,10 @@ def load_data():
 
 df = load_data()
 
+if df.empty:
+    st.error("🚨 Data could not be loaded or the source file is empty. Please check the data source: `data/CONSOLIDATED_ANALYSIS.csv`")
+    st.stop()
+
 # ─────────────────────────────────────────────────────────────────
 # HEADER
 # ─────────────────────────────────────────────────────────────────
@@ -509,7 +513,11 @@ with tab2:
         .reset_index()
         .sort_values("total_revenue", ascending=True)
     )
-    cat_data["revenue_pct"] = (cat_data["total_revenue"] / cat_data["total_revenue"].sum() * 100).round(2)
+    total_cat_revenue = cat_data["total_revenue"].sum()
+    if total_cat_revenue > 0:
+        cat_data["revenue_pct"] = (cat_data["total_revenue"] / total_cat_revenue * 100).round(2)
+    else:
+        cat_data["revenue_pct"] = 0
 
     col_pie, col_bar = st.columns(2)
 
@@ -549,85 +557,88 @@ with tab3:
     st.markdown("**Size** = Efficiency Score | **Color** = Performance Tier | "
                 "**Axes** = Units Sold × Total Revenue")
 
-    scat = filtered_df.copy()
-
-    # Pearson correlation
-    if len(scat) >= 3:
-        r_val, p_val = stats.pearsonr(scat["total_units_sold"], scat["total_revenue"])
+    if filtered_df.empty:
+        st.warning("No data available for the selected filters to display this analysis.")
     else:
-        r_val, p_val = float("nan"), float("nan")
+        scat = filtered_df.copy()
 
-    # Scale efficiency for bubble size (avoid 0-size bubbles)
-    scat["bubble_size"] = (scat["efficiency_score"] * 38 + 4).clip(lower=4)
+        # Pearson correlation
+        if len(scat) >= 3:
+            r_val, p_val = stats.pearsonr(scat["total_units_sold"], scat["total_revenue"])
+        else:
+            r_val, p_val = float("nan"), float("nan")
 
-    fig = px.scatter(
-        scat,
-        x="total_units_sold",
-        y="total_revenue",
-        size="bubble_size",
-        color="performance_tier",
-        hover_name="product_detail",
-        hover_data={
-            "total_units_sold": ":,.0f",
-            "total_revenue": ":,.2f",
-            "efficiency_score": ":.3f",
-            "product_category": True,
-            "bubble_size": False,
-        },
-        color_discrete_map=TIER_COLORS,
-        labels={"total_units_sold": "Units Sold", "total_revenue": "Revenue ($)", "performance_tier": "Tier"},
-        size_max=42,
-    )
+        # Scale efficiency for bubble size (avoid 0-size bubbles)
+        scat["bubble_size"] = (scat["efficiency_score"] * 38 + 4).clip(lower=4)
 
-    # Median reference lines
-    med_vol = scat["total_units_sold"].median()
-    med_rev = scat["total_revenue"].median()
-    fig.add_vline(x=med_vol, line_dash="dot", line_color="#8B6246",
-                  annotation_text=f"Median Volume={med_vol:,.0f}", annotation_position="top right")
-    fig.add_hline(y=med_rev, line_dash="dot", line_color="#8B6246",
-                  annotation_text=f"Median Revenue=${med_rev:,.0f}", annotation_position="top right")
-
-    fig.update_layout(
-        height=580,
-        title="Volume vs. Revenue: Product Performance Distribution",
-    )
-    apply_chart_style(fig)
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Statistical annotation
-    if not np.isnan(r_val):
-        sig = "significant" if p_val < 0.05 else "not significant"
-        stat_color = "#15803D" if p_val < 0.05 else "#B91C1C"
-        st.markdown(
-            f"<div style='background:#FFFFFF;border:2px solid #D4A96A;border-radius:8px;"
-            f"padding:10px 16px;color:#1A0A00;'>"
-            f"📐 <b style='color:#2C1005'>Pearson Correlation (Volume × Revenue):</b> "
-            f"<span style='color:{stat_color};font-size:1.08em;font-weight:700'>r = {r_val:.4f}</span>"
-            f"&nbsp;|&nbsp; "
-            f"<span style='color:#1A0A00'>p-value = {p_val:.4e}</span>&nbsp;|&nbsp; "
-            f"<i style='color:#4A2512'>Statistically {sig} (α = 0.05)</i>&nbsp;|&nbsp; "
-            f"<span style='color:#1A0A00'>n = {len(scat)} products</span>"
-            f"</div>",
-            unsafe_allow_html=True,
+        fig = px.scatter(
+            scat,
+            x="total_units_sold",
+            y="total_revenue",
+            size="bubble_size",
+            color="performance_tier",
+            hover_name="product_detail",
+            hover_data={
+                "total_units_sold": ":,.0f",
+                "total_revenue": ":,.2f",
+                "efficiency_score": ":.3f",
+                "product_category": True,
+                "bubble_size": False,
+            },
+            color_discrete_map=TIER_COLORS,
+            labels={"total_units_sold": "Units Sold", "total_revenue": "Revenue ($)", "performance_tier": "Tier"},
+            size_max=42,
         )
 
-    st.markdown("---")
-    st.markdown("#### 📍 Quadrant Analysis (Median-Based Boundaries)")
+        # Median reference lines
+        med_vol = scat["total_units_sold"].median()
+        med_rev = scat["total_revenue"].median()
+        fig.add_vline(x=med_vol, line_dash="dot", line_color="#8B6246",
+                      annotation_text=f"Median Volume={med_vol:,.0f}", annotation_position="top right")
+        fig.add_hline(y=med_rev, line_dash="dot", line_color="#8B6246",
+                      annotation_text=f"Median Revenue=${med_rev:,.0f}", annotation_position="top right")
 
-    q1 = scat[(scat["total_units_sold"] >= med_vol) & (scat["total_revenue"] >= med_rev)]
-    q2 = scat[(scat["total_units_sold"] < med_vol) & (scat["total_revenue"] >= med_rev)]
-    q3 = scat[(scat["total_units_sold"] < med_vol) & (scat["total_revenue"] < med_rev)]
-    q4 = scat[(scat["total_units_sold"] >= med_vol) & (scat["total_revenue"] < med_rev)]
+        fig.update_layout(
+            height=580,
+            title="Volume vs. Revenue: Product Performance Distribution",
+        )
+        apply_chart_style(fig)
+        st.plotly_chart(fig, use_container_width=True)
 
-    qc1, qc2, qc3, qc4 = st.columns(4)
-    with qc1:
-        st.metric("⭐ Hero Zone (High Vol, High Rev)", f"{len(q1)} products", f"${q1['total_revenue'].sum():,.0f}")
-    with qc2:
-        st.metric("💎 Premium (Low Vol, High Rev)", f"{len(q2)} products", f"${q2['total_revenue'].sum():,.0f}")
-    with qc3:
-        st.metric("❌ Rationalize (Low Vol, Low Rev)", f"{len(q3)} products", f"${q3['total_revenue'].sum():,.0f}")
-    with qc4:
-        st.metric("📦 Volume Drivers (High Vol, Low Rev)", f"{len(q4)} products", f"${q4['total_revenue'].sum():,.0f}")
+        # Statistical annotation
+        if not np.isnan(r_val):
+            sig = "significant" if p_val < 0.05 else "not significant"
+            stat_color = "#15803D" if p_val < 0.05 else "#B91C1C"
+            st.markdown(
+                f"<div style='background:#FFFFFF;border:2px solid #D4A96A;border-radius:8px;"
+                f"padding:10px 16px;color:#1A0A00;'>"
+                f"📐 <b style='color:#2C1005'>Pearson Correlation (Volume × Revenue):</b> "
+                f"<span style='color:{stat_color};font-size:1.08em;font-weight:700'>r = {r_val:.4f}</span>"
+                f"&nbsp;|&nbsp; "
+                f"<span style='color:#1A0A00'>p-value = {p_val:.4e}</span>&nbsp;|&nbsp; "
+                f"<i style='color:#4A2512'>Statistically {sig} (α = 0.05)</i>&nbsp;|&nbsp; "
+                f"<span style='color:#1A0A00'>n = {len(scat)} products</span>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("---")
+        st.markdown("#### 📍 Quadrant Analysis (Median-Based Boundaries)")
+
+        q1 = scat[(scat["total_units_sold"] >= med_vol) & (scat["total_revenue"] >= med_rev)]
+        q2 = scat[(scat["total_units_sold"] < med_vol) & (scat["total_revenue"] >= med_rev)]
+        q3 = scat[(scat["total_units_sold"] < med_vol) & (scat["total_revenue"] < med_rev)]
+        q4 = scat[(scat["total_units_sold"] >= med_vol) & (scat["total_revenue"] < med_rev)]
+
+        qc1, qc2, qc3, qc4 = st.columns(4)
+        with qc1:
+            st.metric("⭐ Hero Zone (High Vol, High Rev)", f"{len(q1)} products", f"${q1['total_revenue'].sum():,.0f}")
+        with qc2:
+            st.metric("💎 Premium (Low Vol, High Rev)", f"{len(q2)} products", f"${q2['total_revenue'].sum():,.0f}")
+        with qc3:
+            st.metric("❌ Rationalize (Low Vol, Low Rev)", f"{len(q3)} products", f"${q3['total_revenue'].sum():,.0f}")
+        with qc4:
+            st.metric("📦 Volume Drivers (High Vol, Low Rev)", f"{len(q4)} products", f"${q4['total_revenue'].sum():,.0f}")
 
 # ══════════════════════════════════════════════════════════════════
 # TAB 4 — PARETO ANALYSIS
@@ -801,68 +812,75 @@ with tab6:
         options=sorted(df["product_detail"].unique()),
     )
 
-    prod = df[df["product_detail"] == product_select].iloc[0]
+    prod_df = df[df["product_detail"] == product_select]
 
-    dc1, dc2, dc3 = st.columns(3)
-    with dc1:
-        st.markdown("#### 📋 Product Identity")
-        st.write(f"**Name:** {prod['product_detail']}")
-        st.write(f"**Category:** {prod['product_category']}")
-        st.write(f"**Type:** {prod['product_type']}")
-        st.write(f"**Tier:** {prod['performance_tier']}")
-        st.write(f"**Pareto Class:** {prod['pareto_class']}")
+    if prod_df.empty:
+        st.warning(f"Could not find details for product: '{product_select}'.")
+    else:
+        prod = prod_df.iloc[0]
 
-    with dc2:
-        st.markdown("#### 💰 Revenue Metrics")
-        st.metric("Total Revenue", f"${prod['total_revenue']:,.2f}")
-        st.metric("Revenue Share", f"{prod['revenue_share_pct']:.2f}%")
-        st.metric("Revenue Rank", f"#{int(prod['revenue_rank'])}")
-        st.metric("Avg Unit Price", f"${prod['avg_unit_price']:.2f}")
+        dc1, dc2, dc3 = st.columns(3)
+        with dc1:
+            st.markdown("#### 📋 Product Identity")
+            st.write(f"**Name:** {prod['product_detail']}")
+            st.write(f"**Category:** {prod['product_category']}")
+            st.write(f"**Type:** {prod['product_type']}")
+            st.write(f"**Tier:** {prod['performance_tier']}")
+            st.write(f"**Pareto Class:** {prod['pareto_class']}")
 
-    with dc3:
-        st.markdown("#### 📦 Volume Metrics")
-        st.metric("Units Sold", f"{int(prod['total_units_sold']):,}")
-        st.metric("Volume Rank", f"#{int(prod['volume_rank'])}")
-        st.metric("Transactions", f"{int(prod['transaction_count']):,}")
-        st.metric("Efficiency Score", f"{prod['efficiency_score']:.3f}")
+        with dc2:
+            st.markdown("#### 💰 Revenue Metrics")
+            st.metric("Total Revenue", f"${prod['total_revenue']:,.2f}")
+            st.metric("Revenue Share", f"{prod['revenue_share_pct']:.2f}%")
+            st.metric("Revenue Rank", f"#{int(prod['revenue_rank'])}")
+            st.metric("Avg Unit Price", f"${prod['avg_unit_price']:.2f}")
 
-    st.markdown("---")
+        with dc3:
+            st.markdown("#### 📦 Volume Metrics")
+            st.metric("Units Sold", f"{int(prod['total_units_sold']):,}")
+            st.metric("Volume Rank", f"#{int(prod['volume_rank'])}")
+            st.metric("Transactions", f"{int(prod['transaction_count']):,}")
+            st.metric("Efficiency Score", f"{prod['efficiency_score']:.3f}")
 
-    da1, da2 = st.columns(2)
+        st.markdown("---")
 
-    with da1:
-        st.markdown("#### ⭐ Category Positioning")
-        cat_group = df[df["product_category"] == prod["product_category"]]
-        cat_avg_eff = cat_group["efficiency_score"].mean()
-        percentile = (df["efficiency_score"] <= prod["efficiency_score"]).sum() / len(df) * 100
-        cat_rank = int(cat_group["total_revenue"].rank(ascending=False)[df[df["product_detail"] == product_select].index[0]])
+        da1, da2 = st.columns(2)
 
-        st.metric("Category Avg Efficiency", f"{cat_avg_eff:.3f}")
-        st.metric("Global Efficiency Percentile", f"{percentile:.0f}th")
-        st.metric("Rank Within Category", f"#{cat_rank} of {len(cat_group)}")
+        with da1:
+            st.markdown("#### ⭐ Category Positioning")
+            cat_group = df[df["product_category"] == prod["product_category"]]
+            cat_avg_eff = cat_group["efficiency_score"].mean()
+            percentile = (df["efficiency_score"] <= prod["efficiency_score"]).sum() / len(df) * 100
+            
+            cat_ranks = cat_group["total_revenue"].rank(method="min", ascending=False)
+            cat_rank = int(cat_ranks.get(prod.name, -1))
 
-    with da2:
-        st.markdown("#### 🏪 Store-Level Revenue Breakdown")
-        store_vals = {
-            store: float(prod.get(store_name_to_col[store], 0))
-            for store in store_name_to_col
-        }
-        store_bk = pd.DataFrame({
-            "Store": list(store_vals.keys()),
-            "Revenue": list(store_vals.values()),
-        })
-        fig = px.bar(
-            store_bk, x="Store", y="Revenue",
-            color="Store",
-            color_discrete_sequence=["#6F4E37", "#D2691E", "#DEB887"],
-            text=store_bk["Revenue"].apply(lambda x: f"${x:,.2f}"),
-            labels={"Revenue": "Revenue ($)"},
-        )
-        fig.update_traces(textposition="outside", textfont=dict(color="#1A0A00"))
-        fig.update_layout(height=300, showlegend=False)
-        fig.update_yaxes(tickprefix="$")
-        apply_chart_style(fig)
-        st.plotly_chart(fig, use_container_width=True)
+            st.metric("Category Avg Efficiency", f"{cat_avg_eff:.3f}")
+            st.metric("Global Efficiency Percentile", f"{percentile:.0f}th")
+            st.metric("Rank Within Category", f"#{cat_rank} of {len(cat_group)}" if cat_rank != -1 else "N/A")
+
+        with da2:
+            st.markdown("#### 🏪 Store-Level Revenue Breakdown")
+            store_vals = {
+                store: float(prod.get(store_name_to_col[store], 0))
+                for store in store_name_to_col
+            }
+            store_bk = pd.DataFrame({
+                "Store": list(store_vals.keys()),
+                "Revenue": list(store_vals.values()),
+            })
+            fig = px.bar(
+                store_bk, x="Store", y="Revenue",
+                color="Store",
+                color_discrete_sequence=["#6F4E37", "#D2691E", "#DEB887"],
+                text=store_bk["Revenue"].apply(lambda x: f"${x:,.2f}"),
+                labels={"Revenue": "Revenue ($)"},
+            )
+            fig.update_traces(textposition="outside", textfont=dict(color="#1A0A00"))
+            fig.update_layout(height=300, showlegend=False)
+            fig.update_yaxes(tickprefix="$")
+            apply_chart_style(fig)
+            st.plotly_chart(fig, use_container_width=True)
 
 # ══════════════════════════════════════════════════════════════════
 # TAB 7 — DATA EXPORT
