@@ -52,10 +52,6 @@ The project was designed to support:
 - `data/SUMMARY_STATISTICS.csv`
   High-level portfolio statistics.
 
-### Manuscript Output
-
-- `RESEARCH_PAPER_MANUSCRIPT_20PAGE.docx`
-  Generated manuscript document.
 
 ## Analytical Scope
 
@@ -99,7 +95,6 @@ streamlit run streamlit_app.py
 
 - The raw source workbook is included in `data/`.
 - The derived CSV outputs correspond to the analytical summaries used by the dashboard and manuscript.
-- The manuscript document is included directly in the repository.
 - Supporting methodological details are documented in `TRANSFORMATION_LOGIC.md`.
 
 ## Recommended Reading Order
@@ -111,7 +106,7 @@ For researchers reviewing the repository, the suggested order is:
 3. `data/SUMMARY_STATISTICS.csv`
 4. `data/CONSOLIDATED_ANALYSIS.csv`
 5. `streamlit_app.py`
-6. `RESEARCH_PAPER_MANUSCRIPT_20PAGE.docx`
+
 
 ## License and Use
 
