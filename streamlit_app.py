@@ -21,25 +21,56 @@ st.set_page_config(
 # ─────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-    /* Main background */
-    .stApp { background-color: #FDF6EC; }
-
-    /* Sidebar */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #3B1A08 0%, #6F4E37 100%);
+    /* ── GLOBAL: Force all main content text to near-black ── */
+    .stApp {
+        background-color: #FDF6EC;
+        color: #1A0A00 !important;
     }
-    [data-testid="stSidebar"] * { color: #F5E6D3 !important; }
+    .stApp * {
+        color: #1A0A00;
+    }
 
-    /* Metric cards */
+    /* ── SIDEBAR ── */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #2C1005 0%, #6F4E37 100%);
+    }
+    [data-testid="stSidebar"] *,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] .stMarkdown {
+        color: #F5E6D3 !important;
+    }
+    /* Sidebar multiselect pills */
+    [data-testid="stSidebar"] [data-baseweb="tag"] {
+        background-color: #D4A96A !important;
+        color: #1A0A00 !important;
+    }
+
+    /* ── METRIC CARDS ── */
     [data-testid="stMetric"] {
         background: #FFFFFF;
-        border: 1px solid #D4A96A;
-        border-radius: 10px;
-        padding: 10px 14px;
-        box-shadow: 0 2px 6px rgba(111,78,55,0.12);
+        border: 2px solid #D4A96A;
+        border-radius: 12px;
+        padding: 12px 16px;
+        box-shadow: 0 3px 10px rgba(111,78,55,0.18);
+    }
+    [data-testid="stMetricLabel"] * {
+        color: #5C3317 !important;
+        font-weight: 700 !important;
+        font-size: 0.88em !important;
+    }
+    [data-testid="stMetricValue"] * {
+        color: #1A0A00 !important;
+        font-weight: 800 !important;
+        font-size: 1.15em !important;
+    }
+    [data-testid="stMetricDelta"] * {
+        font-weight: 600 !important;
     }
 
-    /* Tab bar */
+    /* ── TABS ── */
     .stTabs [data-baseweb="tab-list"] {
         gap: 6px;
         background-color: #EDD8B8;
@@ -48,46 +79,105 @@ st.markdown("""
     }
     .stTabs [data-baseweb="tab"] {
         border-radius: 8px;
-        color: #3B1A08;
-        font-weight: 600;
+        color: #3B1A08 !important;
+        font-weight: 700;
         padding: 6px 14px;
+        background-color: transparent;
     }
     .stTabs [aria-selected="true"] {
         background-color: #6F4E37 !important;
         color: #FDF6EC !important;
     }
+    .stTabs [aria-selected="false"]:hover {
+        background-color: #D4A96A !important;
+        color: #1A0A00 !important;
+    }
 
-    /* Section headers */
-    h1 { color: #3B1A08 !important; }
-    h2, h3 { color: #6F4E37 !important; }
+    /* ── HEADINGS ── */
+    h1 { color: #2C1005 !important; font-weight: 800 !important; }
+    h2 { color: #3B1A08 !important; font-weight: 700 !important; }
+    h3, h4 { color: #4A2512 !important; font-weight: 700 !important; }
 
-    /* Divider */
-    hr { border-color: #D4A96A; }
+    /* ── MARKDOWN / BODY TEXT ── */
+    p, .stMarkdown p, .stMarkdown li, .stMarkdown span,
+    [data-testid="stMarkdownContainer"] p,
+    [data-testid="stMarkdownContainer"] * {
+        color: #1A0A00 !important;
+    }
 
-    /* Download buttons */
+    /* ── DATAFRAME / TABLE ── */
+    .stDataFrame {
+        border: 2px solid #D4A96A;
+        border-radius: 8px;
+    }
+    .stDataFrame td, .stDataFrame th,
+    .stDataFrame [role="cell"], .stDataFrame [role="columnheader"],
+    .stDataFrame span, .stDataFrame div {
+        color: #1A0A00 !important;
+        background-color: #FFFFFF !important;
+    }
+    .stDataFrame [role="columnheader"] {
+        background-color: #F5E6D3 !important;
+        color: #2C1005 !important;
+        font-weight: 700 !important;
+    }
+
+    /* ── SELECTBOX / MULTISELECT / SLIDER LABELS ── */
+    .stSelectbox label, .stMultiSelect label,
+    .stSlider label, .stNumberInput label,
+    label[data-testid="stWidgetLabel"] * {
+        color: #1A0A00 !important;
+        font-weight: 600 !important;
+    }
+    /* Selected values inside selectbox */
+    [data-baseweb="select"] span,
+    [data-baseweb="select"] div {
+        color: #1A0A00 !important;
+    }
+    /* Dropdown options */
+    [data-baseweb="menu"] li {
+        color: #1A0A00 !important;
+    }
+    /* Slider value label */
+    .stSlider [data-testid="stTickBar"] * {
+        color: #5C3317 !important;
+    }
+
+    /* ── DIVIDER ── */
+    hr { border-color: #D4A96A; border-width: 1.5px; }
+
+    /* ── DOWNLOAD BUTTONS ── */
     .stDownloadButton > button {
         background-color: #6F4E37;
-        color: #FDF6EC;
+        color: #FDF6EC !important;
         border-radius: 8px;
         border: none;
+        font-weight: 700;
     }
     .stDownloadButton > button:hover {
-        background-color: #3B1A08;
-        color: #FFFFFF;
+        background-color: #2C1005;
+        color: #FFFFFF !important;
     }
 
-    /* Dataframe */
-    .stDataFrame { border: 1px solid #D4A96A; border-radius: 8px; }
-
-    /* Footer */
+    /* ── FOOTER ── */
     .footer-text {
         text-align: center;
-        color: #8B6246;
+        color: #5C3317 !important;
         font-size: 0.82em;
         padding: 10px 0 4px 0;
     }
+
+    /* ── STAT BOX (Pearson annotation) ── */
+    .stat-box {
+        background: #FFF8F0;
+        border: 2px solid #D4A96A;
+        border-radius: 8px;
+        padding: 10px 16px;
+        color: #1A0A00 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
+
 
 # ─────────────────────────────────────────────────────────────────
 # DATA LOADING
@@ -227,11 +317,46 @@ st.markdown("---")
 # COLOUR MAP — consistent across all charts
 # ─────────────────────────────────────────────────────────────────
 TIER_COLORS = {
-    "Hero": "#FFD700",
-    "High": "#4CAF50",
-    "Medium": "#64B5F6",
-    "Low": "#EF9A9A",
+    "Hero":   "#D97706",   # amber — visible on cream
+    "High":   "#16A34A",   # deep green
+    "Medium": "#2563EB",   # deep blue
+    "Low":    "#DC2626",   # strong red
 }
+
+# Global Plotly chart layout — dark text on white/cream backgrounds
+CHART_LAYOUT = dict(
+    paper_bgcolor="#FFFFFF",
+    plot_bgcolor="#FAFAFA",
+    font=dict(color="#1A0A00", family="Arial, sans-serif", size=13),
+    title_font=dict(color="#2C1005", size=16, family="Arial Black, sans-serif"),
+    legend=dict(
+        font=dict(color="#1A0A00"),
+        bgcolor="#FDF6EC",
+        bordercolor="#D4A96A",
+        borderwidth=1,
+    ),
+    margin=dict(t=60, b=50, l=50, r=30),
+)
+
+# Safe: always identical to CHART_LAYOUT (no xaxis/yaxis in base dict)
+CHART_LAYOUT_BASE = CHART_LAYOUT
+
+# Axis style kwargs — apply via update_xaxes()/update_yaxes() to avoid conflicts
+_AXIS_STYLE = dict(
+    color="#1A0A00",
+    tickfont=dict(color="#1A0A00"),
+    title_font=dict(color="#2C1005"),
+    gridcolor="#EDD8B8",
+    linecolor="#8B6246",
+)
+
+def apply_chart_style(fig):
+    """Apply dark-text axis styling and global layout to any Plotly figure."""
+    fig.update_layout(**CHART_LAYOUT)
+    fig.update_xaxes(**_AXIS_STYLE)
+    fig.update_yaxes(**_AXIS_STYLE)
+    return fig
+
 
 # ─────────────────────────────────────────────────────────────────
 # TABS
@@ -395,8 +520,10 @@ with tab2:
             color_discrete_sequence=px.colors.sequential.Oranges_r,
             hole=0.35,
         )
-        fig.update_traces(textposition="inside", textinfo="percent+label")
+        fig.update_traces(textposition="inside", textinfo="percent+label",
+                          textfont=dict(color="#1A0A00", size=12))
         fig.update_layout(height=420, showlegend=False)
+        apply_chart_style(fig)
         st.plotly_chart(fig, use_container_width=True)
 
     with col_bar:
@@ -407,9 +534,11 @@ with tab2:
             text=cat_data["revenue_pct"].apply(lambda x: f"{x:.1f}%"),
             labels={"total_revenue": "Revenue ($)", "product_category": "Category"},
         )
-        fig.update_traces(textposition="outside")
+        fig.update_traces(textposition="outside", textfont=dict(color="#1A0A00"))
         fig.update_coloraxes(showscale=False)
-        fig.update_layout(height=420, yaxis={"categoryorder": "total ascending"})
+        fig.update_layout(height=420)
+        fig.update_yaxes(categoryorder="total ascending")
+        apply_chart_style(fig)
         st.plotly_chart(fig, use_container_width=True)
 
 # ══════════════════════════════════════════════════════════════════
@@ -461,22 +590,23 @@ with tab3:
     fig.update_layout(
         height=580,
         title="Volume vs. Revenue: Product Performance Distribution",
-        paper_bgcolor="#FFFDF8",
-        plot_bgcolor="#FFFDF8",
     )
+    apply_chart_style(fig)
     st.plotly_chart(fig, use_container_width=True)
 
     # Statistical annotation
     if not np.isnan(r_val):
         sig = "significant" if p_val < 0.05 else "not significant"
-        stat_color = "#2E7D32" if p_val < 0.05 else "#C62828"
+        stat_color = "#15803D" if p_val < 0.05 else "#B91C1C"
         st.markdown(
-            f"<div style='background:#FFF8F0;border:1px solid #D4A96A;border-radius:8px;padding:10px 16px;'>"
-            f"📐 <b>Pearson Correlation (Volume × Revenue):</b> "
-            f"<span style='color:{stat_color};font-size:1.05em'>r = {r_val:.4f}</span> &nbsp;|&nbsp; "
-            f"p-value = {p_val:.4e} &nbsp;|&nbsp; "
-            f"<i>Statistically {sig} (α = 0.05)</i> &nbsp;|&nbsp; "
-            f"n = {len(scat)} products"
+            f"<div style='background:#FFFFFF;border:2px solid #D4A96A;border-radius:8px;"
+            f"padding:10px 16px;color:#1A0A00;'>"
+            f"📐 <b style='color:#2C1005'>Pearson Correlation (Volume × Revenue):</b> "
+            f"<span style='color:{stat_color};font-size:1.08em;font-weight:700'>r = {r_val:.4f}</span>"
+            f"&nbsp;|&nbsp; "
+            f"<span style='color:#1A0A00'>p-value = {p_val:.4e}</span>&nbsp;|&nbsp; "
+            f"<i style='color:#4A2512'>Statistically {sig} (α = 0.05)</i>&nbsp;|&nbsp; "
+            f"<span style='color:#1A0A00'>n = {len(scat)} products</span>"
             f"</div>",
             unsafe_allow_html=True,
         )
@@ -548,15 +678,24 @@ with tab4:
         annotation_position="top right",
     )
     fig.update_layout(
-        yaxis=dict(title="Revenue per Product ($)", color="#D2691E"),
-        yaxis2=dict(title="Cumulative Revenue %", overlaying="y", side="right", range=[0, 105], color="#3B1A08"),
-        xaxis=dict(title="Product Rank (by Revenue)"),
+        yaxis=dict(title="Revenue per Product ($)", color="#1A0A00",
+                   tickfont=dict(color="#1A0A00"), title_font=dict(color="#2C1005"),
+                   gridcolor="#EDD8B8"),
+        yaxis2=dict(title="Cumulative Revenue %", overlaying="y", side="right",
+                    range=[0, 105], color="#1A0A00",
+                    tickfont=dict(color="#1A0A00"), title_font=dict(color="#2C1005")),
+        xaxis=dict(title="Product Rank (by Revenue)", color="#1A0A00",
+                   tickfont=dict(color="#1A0A00"), title_font=dict(color="#2C1005"),
+                   gridcolor="#EDD8B8"),
         height=520,
         hovermode="x unified",
         title="Pareto Analysis: Revenue Distribution Concentration",
-        paper_bgcolor="#FFFDF8",
-        plot_bgcolor="#FFFDF8",
-        legend=dict(x=0.02, y=0.98),
+        legend=dict(x=0.02, y=0.98, font=dict(color="#1A0A00"),
+                    bgcolor="#FDF6EC", bordercolor="#D4A96A", borderwidth=1),
+        paper_bgcolor="#FFFFFF",
+        plot_bgcolor="#FAFAFA",
+        font=dict(color="#1A0A00", family="Arial, sans-serif", size=13),
+        margin=dict(t=60, b=50, l=50, r=30),
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -627,8 +766,9 @@ with tab5:
         color_discrete_sequence=["#6F4E37", "#D2691E", "#DEB887"],
         labels={"Revenue ($)": "Total Revenue ($)"},
     )
-    fig.update_traces(textposition="outside")
-    fig.update_layout(height=400, showlegend=False, paper_bgcolor="#FFFDF8", plot_bgcolor="#FFFDF8")
+    fig.update_traces(textposition="outside", textfont=dict(color="#1A0A00"))
+    fig.update_layout(height=400, showlegend=False)
+    apply_chart_style(fig)
     st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
@@ -718,12 +858,10 @@ with tab6:
             text=store_bk["Revenue"].apply(lambda x: f"${x:,.2f}"),
             labels={"Revenue": "Revenue ($)"},
         )
-        fig.update_traces(textposition="outside")
-        fig.update_layout(
-            height=300, showlegend=False,
-            yaxis_tickprefix="$",
-            paper_bgcolor="#FFFDF8", plot_bgcolor="#FFFDF8",
-        )
+        fig.update_traces(textposition="outside", textfont=dict(color="#1A0A00"))
+        fig.update_layout(height=300, showlegend=False)
+        fig.update_yaxes(tickprefix="$")
+        apply_chart_style(fig)
         st.plotly_chart(fig, use_container_width=True)
 
 # ══════════════════════════════════════════════════════════════════

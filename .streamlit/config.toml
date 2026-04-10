@@ -1,31 +1,28 @@
-# Streamlit Cloud Configuration
-# For deployment on Streamlit Cloud and cloud-compatible environments
+# Streamlit Configuration
+# Project: Afficionado Coffee Roasters — Product Analytics Dashboard
 
 [theme]
-primaryColor = "#D2691E"
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F5F5F5"
-textColor = "#2C2C2C"
-font = "sans serif"
+primaryColor       = "#D2691E"
+backgroundColor    = "#FDF6EC"
+secondaryBackgroundColor = "#F5E6D3"
+textColor          = "#1A0A00"
+font               = "sans serif"
 
 [client]
-showErrorDetails = true
-toolbarMode = "viewer"
+showErrorDetails   = true
+toolbarMode        = "viewer"
 
 [logger]
 level = "info"
 
-[client.showErrorDetails]
-enabled = true
-
 [server]
-port = 8501
-headless = true
-runOnSave = true
-maxUploadSize = 200
+port               = 8501
+headless           = true
+runOnSave          = true
+maxUploadSize      = 200
 enableXsrfProtection = true
-enableCORS = false
+enableCORS         = false
 
 [browser]
-gatherUsageStats = true
-serverAddress = "localhost"
+gatherUsageStats   = false
+serverAddress      = "localhost"
