@@ -3,147 +3,239 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
-import os
 from pathlib import Path
+from scipy import stats
 
-st.set_page_config(page_title="Product Optimization Dashboard", layout="wide", page_icon="☕")
+# ─────────────────────────────────────────────────────────────────
+# PAGE CONFIG
+# ─────────────────────────────────────────────────────────────────
+st.set_page_config(
+    page_title="Afficionado Coffee Roasters – Product Analytics",
+    layout="wide",
+    page_icon="☕",
+    initial_sidebar_state="expanded"
+)
 
-# Load consolidated data (cloud-compatible path handling)
+# ─────────────────────────────────────────────────────────────────
+# CUSTOM CSS – Coffee-Themed Branding
+# ─────────────────────────────────────────────────────────────────
+st.markdown("""
+<style>
+    /* Main background */
+    .stApp { background-color: #FDF6EC; }
+
+    /* Sidebar */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #3B1A08 0%, #6F4E37 100%);
+    }
+    [data-testid="stSidebar"] * { color: #F5E6D3 !important; }
+
+    /* Metric cards */
+    [data-testid="stMetric"] {
+        background: #FFFFFF;
+        border: 1px solid #D4A96A;
+        border-radius: 10px;
+        padding: 10px 14px;
+        box-shadow: 0 2px 6px rgba(111,78,55,0.12);
+    }
+
+    /* Tab bar */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 6px;
+        background-color: #EDD8B8;
+        border-radius: 10px;
+        padding: 4px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 8px;
+        color: #3B1A08;
+        font-weight: 600;
+        padding: 6px 14px;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #6F4E37 !important;
+        color: #FDF6EC !important;
+    }
+
+    /* Section headers */
+    h1 { color: #3B1A08 !important; }
+    h2, h3 { color: #6F4E37 !important; }
+
+    /* Divider */
+    hr { border-color: #D4A96A; }
+
+    /* Download buttons */
+    .stDownloadButton > button {
+        background-color: #6F4E37;
+        color: #FDF6EC;
+        border-radius: 8px;
+        border: none;
+    }
+    .stDownloadButton > button:hover {
+        background-color: #3B1A08;
+        color: #FFFFFF;
+    }
+
+    /* Dataframe */
+    .stDataFrame { border: 1px solid #D4A96A; border-radius: 8px; }
+
+    /* Footer */
+    .footer-text {
+        text-align: center;
+        color: #8B6246;
+        font-size: 0.82em;
+        padding: 10px 0 4px 0;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# ─────────────────────────────────────────────────────────────────
+# DATA LOADING
+# ─────────────────────────────────────────────────────────────────
 @st.cache_data
 def load_data():
-    # Use pathlib for OS-independent path handling
-    script_dir = Path(__file__).parent if '__file__' in dir() else Path.cwd()
-    data_path = script_dir / 'data' / 'CONSOLIDATED_ANALYSIS.csv'
-    
-    # Try alternate path if running from different working directory
+    script_dir = Path(__file__).parent if "__file__" in dir() else Path.cwd()
+    data_path = script_dir / "data" / "CONSOLIDATED_ANALYSIS.csv"
     if not data_path.exists():
-        data_path = Path('data') / 'CONSOLIDATED_ANALYSIS.csv'
-    
-    consolidated = pd.read_csv(data_path)
-    return consolidated
+        data_path = Path("data") / "CONSOLIDATED_ANALYSIS.csv"
+    return pd.read_csv(data_path)
 
 df = load_data()
 
-# Header
+# ─────────────────────────────────────────────────────────────────
+# HEADER
+# ─────────────────────────────────────────────────────────────────
 st.title("☕ Afficionado Coffee Roasters")
 st.header("Product Optimization & Revenue Contribution Analysis")
-st.markdown("**Interactive Dashboard for Data-Driven Menu Decisions** | Powered by Comprehensive Product Analytics")
+st.markdown(
+    "**Interactive Dashboard for Data-Driven Menu Decisions** — "
+    "Powered by Comprehensive Product Analytics | "
+    "*Data Science Internship Project – Unified Mentor*"
+)
 st.markdown("---")
 
-# ============================================================================
-# SIDEBAR FILTERS (PRD REQUIREMENT: Comprehensive Filtering)
-# ============================================================================
-st.sidebar.header("🔍 Filters")
+# ─────────────────────────────────────────────────────────────────
+# SIDEBAR FILTERS
+# ─────────────────────────────────────────────────────────────────
+st.sidebar.markdown("## ☕ Dashboard Filters")
 
-# Filter 1: Product Category Filter (Multi-select)
+# 1. Product Category
 selected_categories = st.sidebar.multiselect(
     "📦 Product Category",
-    options=sorted(df['product_category'].unique()),
-    default=sorted(df['product_category'].unique()),
+    options=sorted(df["product_category"].unique()),
+    default=sorted(df["product_category"].unique()),
     key="category_filter",
-    help="Filter by product category"
 )
 
-# Filter 2: Product Type Filter (Multi-select)
+# 2. Product Type
 selected_types = st.sidebar.multiselect(
     "🏷️ Product Type",
-    options=sorted(df['product_type'].unique()),
-    default=sorted(df['product_type'].unique()),
-    help="Filter by product type"
+    options=sorted(df["product_type"].unique()),
+    default=sorted(df["product_type"].unique()),
 )
 
-# Filter 3: Store Location Selector (Multi-select)
+# 3. Store Location
 selected_stores = st.sidebar.multiselect(
     "🏪 Store Location",
-    options=['All Stores', 'Astoria', 'Hell\'s Kitchen', 'Lower Manhattan'],
-    default='All Stores'
+    options=["All Stores", "Astoria", "Hell's Kitchen", "Lower Manhattan"],
+    default=["All Stores"],
 )
 
-# Filter 4: Performance Tier Filter
+# 4. Performance Tier
 selected_tiers = st.sidebar.multiselect(
     "⭐ Performance Tier",
-    options=['Hero', 'High', 'Medium', 'Low'],
-    default=['Hero', 'High', 'Medium', 'Low']
+    options=["Hero", "High", "Medium", "Low"],
+    default=["Hero", "High", "Medium", "Low"],
 )
 
-# Filter 5: Top-N Slider
+# 5. Top-N Slider
 top_n = st.sidebar.slider("🔝 Top N Products", min_value=5, max_value=50, value=10, step=5)
 
-# Filter 6: Revenue Range Slider
+# 6. Revenue Range
 revenue_range = st.sidebar.slider(
     "💰 Revenue Range ($)",
-    min_value=float(df['total_revenue'].min()),
-    max_value=float(df['total_revenue'].max()),
-    value=(float(df['total_revenue'].min()), float(df['total_revenue'].max())),
-    step=1000.0
+    min_value=float(df["total_revenue"].min()),
+    max_value=float(df["total_revenue"].max()),
+    value=(float(df["total_revenue"].min()), float(df["total_revenue"].max())),
+    step=500.0,
 )
 
-# Filter 7: Volume Range Slider
+# 7. Volume Range
 volume_range = st.sidebar.slider(
     "📊 Unit Volume Range",
-    min_value=int(df['total_units_sold'].min()),
-    max_value=int(df['total_units_sold'].max()),
-    value=(int(df['total_units_sold'].min()), int(df['total_units_sold'].max())),
-    step=100
+    min_value=int(df["total_units_sold"].min()),
+    max_value=int(df["total_units_sold"].max()),
+    value=(int(df["total_units_sold"].min()), int(df["total_units_sold"].max())),
+    step=100,
 )
 
-# Filter 8: Efficiency Score Range
+# 8. Efficiency Score Range
 efficiency_range = st.sidebar.slider(
     "📈 Efficiency Score Range",
     min_value=0.0,
     max_value=1.0,
     value=(0.0, 1.0),
-    step=0.05
+    step=0.05,
 )
 
-# ============================================================================
-# APPLY FILTERS
-# ============================================================================
-# Store name to column mapping
+# ─────────────────────────────────────────────────────────────────
+# STORE COLUMN MAP
+# ─────────────────────────────────────────────────────────────────
 store_name_to_col = {
-    'Astoria': 'revenue_Astoria',
+    "Astoria": "revenue_Astoria",
     "Hell's Kitchen": "revenue_Hell's_Kitchen",
-    'Lower Manhattan': 'revenue_Lower_Manhattan'
+    "Lower Manhattan": "revenue_Lower_Manhattan",
 }
 
+# ─────────────────────────────────────────────────────────────────
+# APPLY FILTERS
+# ─────────────────────────────────────────────────────────────────
 filtered_df = df[
-    (df['product_category'].isin(selected_categories)) &
-    (df['product_type'].isin(selected_types)) &
-    (df['performance_tier'].isin(selected_tiers)) &
-    (df['total_revenue'] >= revenue_range[0]) &
-    (df['total_revenue'] <= revenue_range[1]) &
-    (df['total_units_sold'] >= volume_range[0]) &
-    (df['total_units_sold'] <= volume_range[1]) &
-    (df['efficiency_score'] >= efficiency_range[0]) &
-    (df['efficiency_score'] <= efficiency_range[1])
+    (df["product_category"].isin(selected_categories))
+    & (df["product_type"].isin(selected_types))
+    & (df["performance_tier"].isin(selected_tiers))
+    & (df["total_revenue"] >= revenue_range[0])
+    & (df["total_revenue"] <= revenue_range[1])
+    & (df["total_units_sold"] >= volume_range[0])
+    & (df["total_units_sold"] <= volume_range[1])
+    & (df["efficiency_score"] >= efficiency_range[0])
+    & (df["efficiency_score"] <= efficiency_range[1])
 ].copy()
 
-# Handle store-specific filtering
-if 'All Stores' not in selected_stores:
-    store_cols = [store_name_to_col[store] for store in selected_stores]
-    # Filter for products with measurable revenue in selected stores
+if "All Stores" not in selected_stores and selected_stores:
+    store_cols = [store_name_to_col[s] for s in selected_stores if s in store_name_to_col]
     filtered_df = filtered_df[filtered_df[store_cols].sum(axis=1) > 0]
 
-# ============================================================================
-# KEY METRICS (KPI Display)
-# ============================================================================
-col1, col2, col3, col4, col5 = st.columns(5)
-with col1:
-    st.metric("💰 Total Revenue", f"${filtered_df['total_revenue'].sum():,.0f}")
-with col2:
+# ─────────────────────────────────────────────────────────────────
+# KPI STRIP
+# ─────────────────────────────────────────────────────────────────
+c1, c2, c3, c4, c5 = st.columns(5)
+with c1:
+    st.metric("💰 Total Revenue", f"${filtered_df['total_revenue'].sum():,.2f}")
+with c2:
     st.metric("📦 Products", f"{len(filtered_df)}")
-with col3:
-    st.metric("⭐ Hero Products", f"{len(filtered_df[filtered_df['performance_tier']=='Hero'])}")
-with col4:
-    st.metric("📊 Avg Efficiency", f"{filtered_df['efficiency_score'].mean():.3f}")
-with col5:
-    st.metric("📈 Avg Volume", f"{filtered_df['total_units_sold'].mean():,.0f}")
+with c3:
+    st.metric("⭐ Hero Products", f"{(filtered_df['performance_tier']=='Hero').sum()}")
+with c4:
+    st.metric("📈 Avg Efficiency", f"{filtered_df['efficiency_score'].mean():.3f}")
+with c5:
+    st.metric("📊 Avg Volume", f"{filtered_df['total_units_sold'].mean():,.0f}")
 
 st.markdown("---")
 
-# ============================================================================
-# TAB LAYOUT (PRD REQUIREMENT: 6 Modules + Data View)
-# ============================================================================
+# ─────────────────────────────────────────────────────────────────
+# COLOUR MAP — consistent across all charts
+# ─────────────────────────────────────────────────────────────────
+TIER_COLORS = {
+    "Hero": "#FFD700",
+    "High": "#4CAF50",
+    "Medium": "#64B5F6",
+    "Low": "#EF9A9A",
+}
+
+# ─────────────────────────────────────────────────────────────────
+# TABS
+# ─────────────────────────────────────────────────────────────────
 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📊 Product Rankings",
     "🎯 Revenue Contribution",
@@ -151,491 +243,569 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📊 Pareto Analysis",
     "🏪 Store Performance",
     "🔍 Product Details",
-    "📥 Data Export"
+    "📥 Data Export",
 ])
 
-# ============================================================================
-# TAB 1: PRODUCT RANKING DASHBOARD (PRD Module 1)
-# ============================================================================
+# ══════════════════════════════════════════════════════════════════
+# TAB 1 — PRODUCT RANKINGS
+# ══════════════════════════════════════════════════════════════════
 with tab1:
     st.subheader("Product Performance Rankings")
-    st.markdown("**Ranking Dimensions:** Volume | Revenue | Efficiency Score | Transaction Frequency")
-    
-    col1, col2 = st.columns(2)
-    
-    # TOP-N BY VOLUME
-    with col1:
-        st.markdown("#### 🔝 Top Products by Sales Volume")
-        volume_data = filtered_df.nlargest(top_n, 'total_units_sold')[
-            ['product_detail', 'product_category', 'total_units_sold', 'efficiency_score', 'performance_tier']
-        ].copy()
-        volume_data['efficiency_score'] = volume_data['efficiency_score'].round(3)
-        
-        fig = px.bar(volume_data, x='total_units_sold', y='product_detail',
-                     color='performance_tier', orientation='h',
-                     labels={'total_units_sold': 'Units Sold', 'product_detail': 'Product'},
-                     color_discrete_map={'Hero': '#FFD700', 'High': '#90EE90', 'Medium': '#87CEEB', 'Low': '#FFB6C6'})
-        fig.update_layout(height=500, showlegend=True)
-        st.plotly_chart(fig, use_container_width=True)
-    
-    # TOP-N BY REVENUE
-    with col2:
-        st.markdown("#### 💰 Top Products by Revenue")
-        revenue_data = filtered_df.nlargest(top_n, 'total_revenue')[
-            ['product_detail', 'product_category', 'total_revenue', 'revenue_share_pct', 'performance_tier']
-        ].copy()
-        
-        fig = px.bar(revenue_data, x='total_revenue', y='product_detail',
-                     color='performance_tier', orientation='h',
-                     labels={'total_revenue': 'Revenue ($)', 'product_detail': 'Product'},
-                     color_discrete_map={'Hero': '#FFD700', 'High': '#90EE90', 'Medium': '#87CEEB', 'Low': '#FFB6C6'})
-        fig.update_layout(height=500, showlegend=True)
-        st.plotly_chart(fig, use_container_width=True)
-    
-    # TOP-N BY EFFICIENCY
-    col3, col4 = st.columns(2)
-    with col3:
-        st.markdown("#### ⭐ Top Products by Efficiency Score")
-        efficiency_data = filtered_df.nlargest(top_n, 'efficiency_score')[
-            ['product_detail', 'product_category', 'efficiency_score', 'performance_tier']
-        ].copy()
-        
-        fig = px.bar(efficiency_data, x='efficiency_score', y='product_detail',
-                     color='performance_tier', orientation='h',
-                     labels={'efficiency_score': 'Efficiency Score', 'product_detail': 'Product'},
-                     color_discrete_map={'Hero': '#FFD700', 'High': '#90EE90', 'Medium': '#87CEEB', 'Low': '#FFB6C6'})
-        fig.update_layout(height=500, showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
-    
-    # TOP-N BY TRANSACTION FREQUENCY
-    with col4:
-        st.markdown("#### 🔄 Top Products by Transaction Frequency")
-        trans_data = filtered_df.nlargest(top_n, 'transaction_count')[
-            ['product_detail', 'product_category', 'transaction_count', 'performance_tier']
-        ].copy()
-        
-        fig = px.bar(trans_data, x='transaction_count', y='product_detail',
-                     color='performance_tier', orientation='h',
-                     labels={'transaction_count': 'Transaction Count', 'product_detail': 'Product'},
-                     color_discrete_map={'Hero': '#FFD700', 'High': '#90EE90', 'Medium': '#87CEEB', 'Low': '#FFB6C6'})
-        fig.update_layout(height=500, showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
-    
-    # COMPLETE RANKINGS TABLE
-    st.markdown("#### 📋 Complete Rankings Table")
-    rankings_table = filtered_df[[
-        'product_detail', 'product_category', 'performance_tier',
-        'total_revenue', 'revenue_rank', 'total_units_sold', 'volume_rank',
-        'efficiency_score', 'transaction_count'
-    ]].copy()
-    rankings_table.columns = ['Product', 'Category', 'Tier', 'Revenue', 'Rev Rank', 'Units', 'Vol Rank', 'Efficiency', 'Transactions']
-    rankings_table = rankings_table.sort_values('Revenue', ascending=False)
-    st.dataframe(rankings_table, hide_index=True, use_container_width=True, height=400)
+    st.markdown("Rank products across four dimensions: **Volume · Revenue · Efficiency · Transaction Frequency**")
 
-# ============================================================================
-# TAB 2: REVENUE CONTRIBUTION (PRD Module 2)
-# ============================================================================
+    c1, c2 = st.columns(2)
+
+    with c1:
+        st.markdown("#### 🔝 Top Products by Sales Volume")
+        vol_data = (
+            filtered_df.nlargest(top_n, "total_units_sold")[
+                ["product_detail", "product_category", "total_units_sold", "performance_tier"]
+            ]
+            .copy()
+        )
+        fig = px.bar(
+            vol_data, x="total_units_sold", y="product_detail", orientation="h",
+            color="performance_tier", color_discrete_map=TIER_COLORS,
+            labels={"total_units_sold": "Units Sold", "product_detail": "Product", "performance_tier": "Tier"},
+        )
+        fig.update_layout(height=500, showlegend=True, yaxis={"categoryorder": "total ascending"})
+        st.plotly_chart(fig, use_container_width=True)
+
+    with c2:
+        st.markdown("#### 💰 Top Products by Revenue")
+        rev_data = (
+            filtered_df.nlargest(top_n, "total_revenue")[
+                ["product_detail", "product_category", "total_revenue", "revenue_share_pct", "performance_tier"]
+            ]
+            .copy()
+        )
+        fig = px.bar(
+            rev_data, x="total_revenue", y="product_detail", orientation="h",
+            color="performance_tier", color_discrete_map=TIER_COLORS,
+            labels={"total_revenue": "Revenue ($)", "product_detail": "Product", "performance_tier": "Tier"},
+        )
+        fig.update_layout(height=500, showlegend=True, yaxis={"categoryorder": "total ascending"})
+        st.plotly_chart(fig, use_container_width=True)
+
+    c3, c4 = st.columns(2)
+
+    with c3:
+        st.markdown("#### ⭐ Top Products by Efficiency Score")
+        eff_data = (
+            filtered_df.nlargest(top_n, "efficiency_score")[
+                ["product_detail", "product_category", "efficiency_score", "performance_tier"]
+            ]
+            .copy()
+        )
+        fig = px.bar(
+            eff_data, x="efficiency_score", y="product_detail", orientation="h",
+            color="performance_tier", color_discrete_map=TIER_COLORS,
+            labels={"efficiency_score": "Efficiency Score", "product_detail": "Product", "performance_tier": "Tier"},
+        )
+        fig.update_layout(height=500, showlegend=False, yaxis={"categoryorder": "total ascending"})
+        st.plotly_chart(fig, use_container_width=True)
+
+    with c4:
+        st.markdown("#### 🔄 Top Products by Transaction Frequency")
+        txn_data = (
+            filtered_df.nlargest(top_n, "transaction_count")[
+                ["product_detail", "product_category", "transaction_count", "performance_tier"]
+            ]
+            .copy()
+        )
+        fig = px.bar(
+            txn_data, x="transaction_count", y="product_detail", orientation="h",
+            color="performance_tier", color_discrete_map=TIER_COLORS,
+            labels={"transaction_count": "Transactions", "product_detail": "Product", "performance_tier": "Tier"},
+        )
+        fig.update_layout(height=500, showlegend=False, yaxis={"categoryorder": "total ascending"})
+        st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("#### 📋 Complete Rankings Table")
+    tbl = (
+        filtered_df[
+            [
+                "product_detail", "product_category", "performance_tier",
+                "total_revenue", "revenue_rank", "total_units_sold", "volume_rank",
+                "efficiency_score", "transaction_count",
+            ]
+        ]
+        .copy()
+        .sort_values("total_revenue", ascending=False)
+    )
+    tbl.columns = ["Product", "Category", "Tier", "Revenue ($)", "Rev Rank", "Units Sold", "Vol Rank", "Efficiency", "Transactions"]
+    tbl["Revenue ($)"] = tbl["Revenue ($)"].map("${:,.2f}".format)
+    st.dataframe(tbl, hide_index=True, use_container_width=True, height=400)
+
+# ══════════════════════════════════════════════════════════════════
+# TAB 2 — REVENUE CONTRIBUTION
+# ══════════════════════════════════════════════════════════════════
 with tab2:
     st.subheader("Revenue Contribution Analysis")
-    
-    col1, col2 = st.columns([2, 1])
-    
-    # TREEMAP: Revenue Distribution by Category and Product
-    with col1:
-        st.markdown("#### 🎯 Revenue Share by Category & Product")
-        treemap_data = filtered_df.nlargest(20, 'total_revenue')
-        
-        fig = px.treemap(treemap_data,
-                         path=['product_category', 'product_detail'],
-                         values='total_revenue',
-                         color='efficiency_score',
-                         color_continuous_scale='RdYlGn',
-                         labels={'efficiency_score': 'Efficiency'},
-                         hover_data={'total_revenue': ':.2f', 'revenue_share_pct': ':.2f'})
-        fig.update_layout(height=500)
+
+    c1, c2 = st.columns([2, 1])
+
+    with c1:
+        st.markdown("#### 🎯 Revenue Share by Category & Product (Treemap)")
+        treemap_data = filtered_df.nlargest(20, "total_revenue")
+        fig = px.treemap(
+            treemap_data,
+            path=["product_category", "product_detail"],
+            values="total_revenue",
+            color="efficiency_score",
+            color_continuous_scale="RdYlGn",
+            hover_data={"total_revenue": ":,.2f", "revenue_share_pct": ":.2f"},
+            labels={"efficiency_score": "Efficiency", "total_revenue": "Revenue ($)"},
+        )
+        fig.update_layout(height=480)
         st.plotly_chart(fig, use_container_width=True)
-    
-    # TOP CONTRIBUTORS TABLE
-    with col2:
+
+    with c2:
         st.markdown("#### 💰 Top 10 Revenue Contributors")
-        top_10 = filtered_df.nlargest(10, 'total_revenue')[
-            ['product_detail', 'total_revenue', 'revenue_share_pct', 'efficiency_score']
-        ].copy()
-        top_10['total_revenue'] = top_10['total_revenue'].apply(lambda x: f"${x:,.0f}")
-        top_10['revenue_share_pct'] = top_10['revenue_share_pct'].apply(lambda x: f"{x:.2f}%")
-        top_10['efficiency_score'] = top_10['efficiency_score'].apply(lambda x: f"{x:.3f}")
-        top_10.columns = ['Product', 'Revenue', 'Share %', 'Efficiency']
-        st.dataframe(top_10, hide_index=True, height=450)
-    
-    # CATEGORY BREAKDOWN
+        top10 = (
+            filtered_df.nlargest(10, "total_revenue")[
+                ["product_detail", "total_revenue", "revenue_share_pct", "efficiency_score"]
+            ]
+            .copy()
+        )
+        top10["total_revenue"] = top10["total_revenue"].apply(lambda x: f"${x:,.0f}")
+        top10["revenue_share_pct"] = top10["revenue_share_pct"].apply(lambda x: f"{x:.2f}%")
+        top10["efficiency_score"] = top10["efficiency_score"].apply(lambda x: f"{x:.3f}")
+        top10.columns = ["Product", "Revenue", "Share %", "Efficiency"]
+        st.dataframe(top10, hide_index=True, height=460)
+
     st.markdown("---")
     st.markdown("#### 📊 Category Revenue Distribution")
-    category_data = filtered_df.groupby('product_category').agg({
-        'total_revenue': 'sum',
-        'product_id': 'count',
-        'efficiency_score': 'mean'
-    }).reset_index().sort_values('total_revenue', ascending=False)
-    category_data['revenue_pct'] = (category_data['total_revenue'] / category_data['total_revenue'].sum() * 100).round(1)
-    
-    fig = px.pie(category_data, values='total_revenue', names='product_category',
-                 color_discrete_sequence=px.colors.sequential.Oranges_r)
-    fig.update_traces(textposition='inside', textinfo='percent+label')
-    fig.update_layout(height=400)
-    st.plotly_chart(fig, use_container_width=True)
 
-# ============================================================================
-# TAB 3: POPULARITY VS REVENUE ANALYSIS (PRD Module 3 - NEW)
-# ============================================================================
+    cat_data = (
+        filtered_df.groupby("product_category")
+        .agg(total_revenue=("total_revenue", "sum"), unique_products=("product_id", "count"),
+             avg_efficiency=("efficiency_score", "mean"))
+        .reset_index()
+        .sort_values("total_revenue", ascending=True)
+    )
+    cat_data["revenue_pct"] = (cat_data["total_revenue"] / cat_data["total_revenue"].sum() * 100).round(2)
+
+    col_pie, col_bar = st.columns(2)
+
+    with col_pie:
+        st.markdown("**Pie Chart — Revenue Share by Category**")
+        fig = px.pie(
+            cat_data, values="total_revenue", names="product_category",
+            color_discrete_sequence=px.colors.sequential.Oranges_r,
+            hole=0.35,
+        )
+        fig.update_traces(textposition="inside", textinfo="percent+label")
+        fig.update_layout(height=420, showlegend=False)
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col_bar:
+        st.markdown("**Bar Chart — Revenue Ranking by Category**")
+        fig = px.bar(
+            cat_data, x="total_revenue", y="product_category", orientation="h",
+            color="total_revenue", color_continuous_scale="Oranges",
+            text=cat_data["revenue_pct"].apply(lambda x: f"{x:.1f}%"),
+            labels={"total_revenue": "Revenue ($)", "product_category": "Category"},
+        )
+        fig.update_traces(textposition="outside")
+        fig.update_coloraxes(showscale=False)
+        fig.update_layout(height=420, yaxis={"categoryorder": "total ascending"})
+        st.plotly_chart(fig, use_container_width=True)
+
+# ══════════════════════════════════════════════════════════════════
+# TAB 3 — POPULARITY vs REVENUE (SCATTER)
+# ══════════════════════════════════════════════════════════════════
 with tab3:
-    st.subheader("Popularity vs. Revenue Analysis - Scatter Plot")
-    st.markdown("**Identify products by volume-revenue alignment**: Size=Efficiency | Color=Performance Tier")
-    
-    # SCATTER PLOT: Volume vs Revenue
-    scatter_data = filtered_df.copy()
-    
-    fig = px.scatter(scatter_data,
-                     x='total_units_sold',
-                     y='total_revenue',
-                     size='efficiency_score',
-                     color='performance_tier',
-                     hover_name='product_detail',
-                     hover_data={'total_units_sold': ':.0f', 'total_revenue': ':.2f', 'efficiency_score': ':.3f'},
-                     color_discrete_map={'Hero': '#FFD700', 'High': '#90EE90', 'Medium': '#87CEEB', 'Low': '#FFB6C6'},
-                     labels={'total_units_sold': 'Units Sold', 'total_revenue': 'Revenue ($)'},
-                     size_max=40)
-    
-    fig.update_layout(height=600, title="Volume vs. Revenue: Product Performance Distribution")
-    st.plotly_chart(fig, use_container_width=True)
-    
-    # QUADRANT ANALYSIS
-    st.markdown("---")
-    st.markdown("#### 📍 Quadrant Analysis")
-    
-    median_volume = scatter_data['total_units_sold'].median()
-    median_revenue = scatter_data['total_revenue'].median()
-    
-    col1, col2, col3, col4 = st.columns(4)
-    
-    # Quadrant 1: High Volume, High Revenue (Hero zone)
-    q1 = scatter_data[(scatter_data['total_units_sold'] >= median_volume) &
-                      (scatter_data['total_revenue'] >= median_revenue)]
-    with col1:
-        st.metric("⭐ Hero Zone\n(High Vol, High Rev)", f"{len(q1)} products",
-                  f"${q1['total_revenue'].sum():,.0f}")
-    
-    # Quadrant 2: Low Volume, High Revenue (Premium)
-    q2 = scatter_data[(scatter_data['total_units_sold'] < median_volume) &
-                      (scatter_data['total_revenue'] >= median_revenue)]
-    with col2:
-        st.metric("💎 Premium\n(Low Vol, High Rev)", f"{len(q2)} products",
-                  f"${q2['total_revenue'].sum():,.0f}")
-    
-    # Quadrant 3: Low Volume, Low Revenue (Rationalization)
-    q3 = scatter_data[(scatter_data['total_units_sold'] < median_volume) &
-                      (scatter_data['total_revenue'] < median_revenue)]
-    with col3:
-        st.metric("❌ Rationalization\n(Low Vol, Low Rev)", f"{len(q3)} products",
-                  f"${q3['total_revenue'].sum():,.0f}")
-    
-    # Quadrant 4: High Volume, Low Revenue (Volume drivers)
-    q4 = scatter_data[(scatter_data['total_units_sold'] >= median_volume) &
-                      (scatter_data['total_revenue'] < median_revenue)]
-    with col4:
-        st.metric("📦 Volume Drivers\n(High Vol, Low Rev)", f"{len(q4)} products",
-                  f"${q4['total_revenue'].sum():,.0f}")
+    st.subheader("Popularity vs. Revenue — Scatter Analysis")
+    st.markdown("**Size** = Efficiency Score | **Color** = Performance Tier | "
+                "**Axes** = Units Sold × Total Revenue")
 
-# ============================================================================
-# TAB 4: PARETO ANALYSIS (PRD Module 4)
-# ============================================================================
-with tab4:
-    st.subheader("Revenue Concentration & Pareto Analysis (80/20 Rule)")
-    
-    pareto_data = df.sort_values('revenue_rank').copy()
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        pareto_80 = len(pareto_data[pareto_data['pareto_class'] == 'Top_80%'])
-        st.metric("📊 Products for 80% Revenue", f"{pareto_80}\n({pareto_80/len(df)*100:.1f}%)")
-    with col2:
-        top_10_share = pareto_data.head(10)['revenue_share_pct'].sum()
-        st.metric("🔝 Top 10 Revenue Share", f"{top_10_share:.2f}%")
-    with col3:
-        long_tail = len(pareto_data[pareto_data['pareto_class'] == 'Long_Tail'])
-        st.metric("📉 Long-Tail Products", f"{long_tail}\n({long_tail/len(df)*100:.1f}%)")
-    
-    st.markdown("---")
-    st.markdown("#### 📈 Cumulative Revenue Curve (Pareto Chart)")
-    
-    # Pareto curve with dual axes
-    fig = go.Figure()
-    
-    # Bar chart for individual product revenue
-    fig.add_trace(go.Bar(
-        x=pareto_data['revenue_rank'].head(40),
-        y=pareto_data['total_revenue'].head(40),
-        name='Product Revenue',
-        marker_color='#D2691E',
-        yaxis='y1'
-    ))
-    
-    # Line chart for cumulative percentage
-    fig.add_trace(go.Scatter(
-        x=pareto_data['revenue_rank'].head(40),
-        y=pareto_data['cumulative_revenue_pct'].head(40),
-        name='Cumulative %',
-        yaxis='y2',
-        line=dict(color='#8B4513', width=3),
-        mode='lines+markers'
-    ))
-    
-    # Add 80% threshold line
-    fig.add_hline(y=80, line_dash="dash", line_color="red",
-                  annotation_text="80% Threshold", yref='y2')
-    
+    scat = filtered_df.copy()
+
+    # Pearson correlation
+    if len(scat) >= 3:
+        r_val, p_val = stats.pearsonr(scat["total_units_sold"], scat["total_revenue"])
+    else:
+        r_val, p_val = float("nan"), float("nan")
+
+    # Scale efficiency for bubble size (avoid 0-size bubbles)
+    scat["bubble_size"] = (scat["efficiency_score"] * 38 + 4).clip(lower=4)
+
+    fig = px.scatter(
+        scat,
+        x="total_units_sold",
+        y="total_revenue",
+        size="bubble_size",
+        color="performance_tier",
+        hover_name="product_detail",
+        hover_data={
+            "total_units_sold": ":,.0f",
+            "total_revenue": ":,.2f",
+            "efficiency_score": ":.3f",
+            "product_category": True,
+            "bubble_size": False,
+        },
+        color_discrete_map=TIER_COLORS,
+        labels={"total_units_sold": "Units Sold", "total_revenue": "Revenue ($)", "performance_tier": "Tier"},
+        size_max=42,
+    )
+
+    # Median reference lines
+    med_vol = scat["total_units_sold"].median()
+    med_rev = scat["total_revenue"].median()
+    fig.add_vline(x=med_vol, line_dash="dot", line_color="#8B6246",
+                  annotation_text=f"Median Volume={med_vol:,.0f}", annotation_position="top right")
+    fig.add_hline(y=med_rev, line_dash="dot", line_color="#8B6246",
+                  annotation_text=f"Median Revenue=${med_rev:,.0f}", annotation_position="top right")
+
     fig.update_layout(
-        yaxis=dict(title='Revenue per Product ($)'),
-        yaxis2=dict(title='Cumulative Revenue %', overlaying='y', side='right', range=[0, 105]),
-        xaxis=dict(title='Product Rank'),
-        height=500,
-        hovermode='x unified',
-        title="Pareto Analysis: Revenue Distribution Concentration"
+        height=580,
+        title="Volume vs. Revenue: Product Performance Distribution",
+        paper_bgcolor="#FFFDF8",
+        plot_bgcolor="#FFFDF8",
     )
     st.plotly_chart(fig, use_container_width=True)
-    
-    # Pareto Statistics
+
+    # Statistical annotation
+    if not np.isnan(r_val):
+        sig = "significant" if p_val < 0.05 else "not significant"
+        stat_color = "#2E7D32" if p_val < 0.05 else "#C62828"
+        st.markdown(
+            f"<div style='background:#FFF8F0;border:1px solid #D4A96A;border-radius:8px;padding:10px 16px;'>"
+            f"📐 <b>Pearson Correlation (Volume × Revenue):</b> "
+            f"<span style='color:{stat_color};font-size:1.05em'>r = {r_val:.4f}</span> &nbsp;|&nbsp; "
+            f"p-value = {p_val:.4e} &nbsp;|&nbsp; "
+            f"<i>Statistically {sig} (α = 0.05)</i> &nbsp;|&nbsp; "
+            f"n = {len(scat)} products"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+
     st.markdown("---")
-    st.markdown("#### 📊 Pareto Classification Statistics")
+    st.markdown("#### 📍 Quadrant Analysis (Median-Based Boundaries)")
+
+    q1 = scat[(scat["total_units_sold"] >= med_vol) & (scat["total_revenue"] >= med_rev)]
+    q2 = scat[(scat["total_units_sold"] < med_vol) & (scat["total_revenue"] >= med_rev)]
+    q3 = scat[(scat["total_units_sold"] < med_vol) & (scat["total_revenue"] < med_rev)]
+    q4 = scat[(scat["total_units_sold"] >= med_vol) & (scat["total_revenue"] < med_rev)]
+
+    qc1, qc2, qc3, qc4 = st.columns(4)
+    with qc1:
+        st.metric("⭐ Hero Zone (High Vol, High Rev)", f"{len(q1)} products", f"${q1['total_revenue'].sum():,.0f}")
+    with qc2:
+        st.metric("💎 Premium (Low Vol, High Rev)", f"{len(q2)} products", f"${q2['total_revenue'].sum():,.0f}")
+    with qc3:
+        st.metric("❌ Rationalize (Low Vol, Low Rev)", f"{len(q3)} products", f"${q3['total_revenue'].sum():,.0f}")
+    with qc4:
+        st.metric("📦 Volume Drivers (High Vol, Low Rev)", f"{len(q4)} products", f"${q4['total_revenue'].sum():,.0f}")
+
+# ══════════════════════════════════════════════════════════════════
+# TAB 4 — PARETO ANALYSIS
+# ══════════════════════════════════════════════════════════════════
+with tab4:
+    st.subheader("Revenue Concentration & Pareto Analysis (80/20 Rule)")
+
+    pareto_data = df.sort_values("revenue_rank").copy()
+
+    pc1, pc2, pc3 = st.columns(3)
+    with pc1:
+        p80 = len(pareto_data[pareto_data["pareto_class"] == "Top_80%"])
+        st.metric("📊 Products Driving 80% Revenue", f"{p80}  ({p80/len(df)*100:.1f}%)")
+    with pc2:
+        top10_share = pareto_data.head(10)["revenue_share_pct"].sum()
+        st.metric("🔝 Top 10 Products Revenue Share", f"{top10_share:.2f}%")
+    with pc3:
+        lt = len(pareto_data[pareto_data["pareto_class"] == "Long_Tail"])
+        st.metric("📉 Long-Tail Products", f"{lt}  ({lt/len(df)*100:.1f}%)")
+
+    st.markdown("---")
+    st.markdown("#### 📈 Cumulative Revenue Curve (Pareto Chart) — Top 40 Products")
+
+    top40 = pareto_data.head(40)
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=top40["revenue_rank"],
+        y=top40["total_revenue"],
+        name="Product Revenue ($)",
+        marker_color="#D2691E",
+        yaxis="y1",
+        hovertemplate="Rank %{x}<br>Revenue: $%{y:,.2f}<extra></extra>",
+    ))
+    fig.add_trace(go.Scatter(
+        x=top40["revenue_rank"],
+        y=top40["cumulative_revenue_pct"],
+        name="Cumulative % →",
+        yaxis="y2",
+        line=dict(color="#3B1A08", width=3),
+        mode="lines+markers",
+        marker=dict(size=6),
+        hovertemplate="Rank %{x}<br>Cumulative: %{y:.1f}%<extra></extra>",
+    ))
+    fig.add_hline(
+        y=80, line_dash="dash", line_color="red",
+        annotation_text="80% Revenue Threshold", yref="y2",
+        annotation_position="top right",
+    )
+    fig.update_layout(
+        yaxis=dict(title="Revenue per Product ($)", color="#D2691E"),
+        yaxis2=dict(title="Cumulative Revenue %", overlaying="y", side="right", range=[0, 105], color="#3B1A08"),
+        xaxis=dict(title="Product Rank (by Revenue)"),
+        height=520,
+        hovermode="x unified",
+        title="Pareto Analysis: Revenue Distribution Concentration",
+        paper_bgcolor="#FFFDF8",
+        plot_bgcolor="#FFFDF8",
+        legend=dict(x=0.02, y=0.98),
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("---")
+    st.markdown("#### 📊 Pareto Classification Summary")
     pareto_stats = pd.DataFrame({
-        'Classification': ['Top 80%', 'Long-Tail'],
-        'Product Count': [
-            len(pareto_data[pareto_data['pareto_class'] == 'Top_80%']),
-            len(pareto_data[pareto_data['pareto_class'] == 'Long_Tail'])
+        "Classification": ["Top 80%", "Long-Tail"],
+        "Product Count": [
+            len(pareto_data[pareto_data["pareto_class"] == "Top_80%"]),
+            len(pareto_data[pareto_data["pareto_class"] == "Long_Tail"]),
         ],
-        'Total Revenue': [
-            pareto_data[pareto_data['pareto_class'] == 'Top_80%']['total_revenue'].sum(),
-            pareto_data[pareto_data['pareto_class'] == 'Long_Tail']['total_revenue'].sum()
+        "Total Revenue ($)": [
+            f"${pareto_data[pareto_data['pareto_class']=='Top_80%']['total_revenue'].sum():,.2f}",
+            f"${pareto_data[pareto_data['pareto_class']=='Long_Tail']['total_revenue'].sum():,.2f}",
         ],
-        'Revenue %': [
-            pareto_data[pareto_data['pareto_class'] == 'Top_80%']['revenue_share_pct'].sum(),
-            pareto_data[pareto_data['pareto_class'] == 'Long_Tail']['revenue_share_pct'].sum()
-        ]
+        "Revenue Share (%)": [
+            f"{pareto_data[pareto_data['pareto_class']=='Top_80%']['revenue_share_pct'].sum():.2f}%",
+            f"{pareto_data[pareto_data['pareto_class']=='Long_Tail']['revenue_share_pct'].sum():.2f}%",
+        ],
+        "% of Products": [
+            f"{len(pareto_data[pareto_data['pareto_class']=='Top_80%'])/len(pareto_data)*100:.1f}%",
+            f"{len(pareto_data[pareto_data['pareto_class']=='Long_Tail'])/len(pareto_data)*100:.1f}%",
+        ],
     })
-    pareto_stats['Total Revenue'] = pareto_stats['Total Revenue'].apply(lambda x: f"${x:,.0f}")
-    pareto_stats['Revenue %'] = pareto_stats['Revenue %'].apply(lambda x: f"{x:.2f}%")
     st.dataframe(pareto_stats, hide_index=True, use_container_width=True)
 
-# ============================================================================
-# TAB 5: STORE PERFORMANCE (PRD Module 5 - NEW)
-# ============================================================================
+# ══════════════════════════════════════════════════════════════════
+# TAB 5 — STORE PERFORMANCE
+# ══════════════════════════════════════════════════════════════════
 with tab5:
     st.subheader("Store Performance Comparison Analysis")
-    
-    # Store selection and column mapping
-    store_name_to_col = {
-        'Astoria': 'revenue_Astoria',
-        "Hell's Kitchen": "revenue_Hell's_Kitchen",
-        'Lower Manhattan': 'revenue_Lower_Manhattan'
-    }
-    
+
     analysis_stores = st.multiselect(
         "🏪 Select Stores to Compare",
         options=list(store_name_to_col.keys()),
-        default=list(store_name_to_col.keys())
+        default=list(store_name_to_col.keys()),
     )
-    
-    # Store metrics
-    col1, col2, col3 = st.columns(3)
-    
-    store_revenues = {}
-    for store in analysis_stores:
-        store_col = store_name_to_col[store]
-        store_rev = df[store_col].sum()
-        store_revenues[store] = store_rev
-    
-    for idx, store in enumerate(['Astoria', "Hell's Kitchen", 'Lower Manhattan']):
+
+    store_revenues = {
+        s: df[store_name_to_col[s]].sum()
+        for s in analysis_stores
+    }
+    total_store_rev = sum(store_revenues.values())
+
+    sc1, sc2, sc3 = st.columns(3)
+    cols_list = [sc1, sc2, sc3]
+    all_stores = ["Astoria", "Hell's Kitchen", "Lower Manhattan"]
+    for idx, store in enumerate(all_stores):
         if store in analysis_stores:
-            cols_list = [col1, col2, col3]
+            rev = store_revenues[store]
+            pct = rev / total_store_rev * 100 if total_store_rev > 0 else 0
             with cols_list[idx]:
-                st.metric(store, f"${store_revenues.get(store, 0):,.0f}")
-    
+                st.metric(f"🏪 {store}", f"${rev:,.2f}", f"{pct:.2f}% share")
+
     st.markdown("---")
     st.markdown("#### 📊 Revenue Distribution by Store")
-    
-    # Store comparison chart
-    store_data_list = []
-    for store in analysis_stores:
-        store_col = store_name_to_col[store]
-        store_data_list.append({
-            'Store': store,
-            'Revenue': df[store_col].sum()
-        })
-    
-    store_df = pd.DataFrame(store_data_list)
-    
-    fig = px.bar(store_df, x='Store', y='Revenue',
-                 color='Store',
-                 color_discrete_sequence=px.colors.qualitative.Set2,
-                 labels={'Revenue': 'Total Revenue ($)'})
-    fig.update_layout(height=400)
-    st.plotly_chart(fig, use_container_width=True)
-    
-    # Store-specific product rankings
-    st.markdown("---")
-    st.markdown("#### 🏆 Top Products by Store")
-    
-    store_cols = {store: store_name_to_col[store] for store in analysis_stores}
-    
-    for col_idx, store in enumerate(analysis_stores):
-        if col_idx % 3 == 0:
-            cols = st.columns(3)
-        
-        store_col = store_cols[store]
-        top_store_products = df[[
-            'product_detail', 'product_category', store_col
-        ]].copy().nlargest(5, store_col)
-        top_store_products[store_col] = top_store_products[store_col].apply(lambda x: f"${x:,.0f}")
-        top_store_products.columns = ['Product', 'Category', f'{store} Revenue']
-        
-        with cols[col_idx % 3]:
-            st.markdown(f"**{store}**")
-            st.dataframe(top_store_products, hide_index=True, height=250, use_container_width=True)
 
-# ============================================================================
-# TAB 6: PRODUCT DRILL-DOWN (PRD Module 6 - NEW)
-# ============================================================================
+    store_df = pd.DataFrame([
+        {"Store": s, "Revenue ($)": store_revenues[s],
+         "Share (%)": store_revenues[s] / total_store_rev * 100 if total_store_rev else 0}
+        for s in analysis_stores
+    ])
+
+    fig = px.bar(
+        store_df, x="Store", y="Revenue ($)",
+        color="Store",
+        text=store_df["Share (%)"].apply(lambda x: f"{x:.2f}%"),
+        color_discrete_sequence=["#6F4E37", "#D2691E", "#DEB887"],
+        labels={"Revenue ($)": "Total Revenue ($)"},
+    )
+    fig.update_traces(textposition="outside")
+    fig.update_layout(height=400, showlegend=False, paper_bgcolor="#FFFDF8", plot_bgcolor="#FFFDF8")
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("---")
+    st.markdown("#### 🏆 Top 5 Products by Store")
+
+    store_cols_map = {s: store_name_to_col[s] for s in analysis_stores}
+    disp_cols = st.columns(len(analysis_stores)) if analysis_stores else []
+
+    for idx, store in enumerate(analysis_stores):
+        scol = store_cols_map[store]
+        top5 = (
+            df[["product_detail", "product_category", scol]]
+            .nlargest(5, scol)
+            .copy()
+        )
+        top5[scol] = top5[scol].apply(lambda x: f"${x:,.2f}")
+        top5.columns = ["Product", "Category", f"{store} Revenue"]
+        with disp_cols[idx]:
+            st.markdown(f"**{store}**")
+            st.dataframe(top5, hide_index=True, use_container_width=True, height=260)
+
+# ══════════════════════════════════════════════════════════════════
+# TAB 6 — PRODUCT DRILL-DOWN
+# ══════════════════════════════════════════════════════════════════
 with tab6:
-    st.subheader("Product Drill-Down Detail View")
-    
-    # Product selector
+    st.subheader("Product Drill-Down – Individual Performance View")
+
     product_select = st.selectbox(
         "🔍 Select Product for Detailed Analysis",
-        options=df['product_detail'].sort_values(),
-        help="Choose a product to view comprehensive metrics"
+        options=sorted(df["product_detail"].unique()),
     )
-    
-    product_info = df[df['product_detail'] == product_select].iloc[0]
-    
-    # Comprehensive Product Card
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown("#### 📋 Product Identification")
-        st.write(f"**Product Name:** {product_info['product_detail']}")
-        st.write(f"**Category:** {product_info['product_category']}")
-        st.write(f"**Type:** {product_info['product_type']}")
-        st.write(f"**Performance Tier:** {product_info['performance_tier']}")
-    
-    with col2:
-        st.markdown("#### 💰 Revenue Metrics")
-        st.metric("Total Revenue", f"${product_info['total_revenue']:,.2f}")
-        st.metric("Revenue Share %", f"{product_info['revenue_share_pct']:.2f}%")
-        st.metric("Revenue Rank", f"#{int(product_info['revenue_rank'])}")
-    
-    with col3:
-        st.markdown("#### 📊 Volume Metrics")
-        st.metric("Units Sold", f"{int(product_info['total_units_sold']):,}")
-        st.metric("Volume Rank", f"#{int(product_info['volume_rank'])}")
-        st.metric("Transactions", f"{int(product_info['transaction_count']):,}")
-    
-    st.markdown("---")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("#### ⭐ Performance Metrics")
-        st.metric("Efficiency Score", f"{product_info['efficiency_score']:.3f}")
-        st.metric("Pareto Classification", product_info['pareto_class'])
-        st.metric("Average Unit Price", f"${product_info['avg_unit_price']:.2f}")
-    
-    with col2:
-        st.markdown("#### 📍 Category Positioning")
-        category_avg_eff = df[df['product_category'] == product_info['product_category']]['efficiency_score'].mean()
-        st.metric("Category Efficiency Avg", f"{category_avg_eff:.3f}")
-        
-        percentile = (df['efficiency_score'] <= product_info['efficiency_score']).sum() / len(df) * 100
-        st.metric("Efficiency Percentile", f"{percentile:.0f}th")
-        
-        st.metric("Category", product_info['product_category'])
-    
-    st.markdown("---")
-    
-    # Store-level breakdown
-    st.markdown("#### 🏪 Store-Level Performance")
-    store_col_mapping = {
-        'Astoria': 'revenue_Astoria',
-        "Hell's Kitchen": "revenue_Hell's_Kitchen",
-        'Lower Manhattan': 'revenue_Lower_Manhattan'
-    }
-    
-    store_breakdown = pd.DataFrame({
-        'Store': list(store_col_mapping.keys()),
-        'Revenue': [product_info.get(store_col_mapping[s], 0) for s in store_col_mapping.keys()]
-    })
-    store_breakdown['Revenue'] = store_breakdown['Revenue'].apply(lambda x: f"${x:,.2f}")
-    
-    fig = px.bar(store_breakdown, x='Store', y='Revenue',
-                 color='Store',
-                 color_discrete_sequence=px.colors.qualitative.Set2)
-    fig.update_layout(height=350)
-    st.plotly_chart(fig, use_container_width=True)
 
-# ============================================================================
-# TAB 7: CONSOLIDATED DATA (PRD Requirement: Data Export)
-# ============================================================================
-with tab7:
-    st.subheader("Consolidated Product Analysis Data")
-    st.markdown("Complete dataset with all analytical metrics. **Sortable, filterable, and downloadable as CSV.**")
-    
-    # Display full consolidated data with all relevant columns
-    display_df = filtered_df[[
-        'product_detail', 'product_category', 'product_type', 'performance_tier',
-        'total_revenue', 'revenue_share_pct', 'revenue_rank',
-        'total_units_sold', 'volume_rank', 'efficiency_score',
-        'pareto_class', 'transaction_count', 'avg_unit_price'
-    ]].copy().sort_values('total_revenue', ascending=False)
-    
-    display_df.columns = [
-        'Product', 'Category', 'Type', 'Tier',
-        'Revenue', 'Share %', 'Rev Rank',
-        'Units Sold', 'Vol Rank', 'Efficiency',
-        'Pareto', 'Transactions', 'Avg Price'
-    ]
-    
-    st.dataframe(display_df, hide_index=True, height=600, use_container_width=True)
-    
+    prod = df[df["product_detail"] == product_select].iloc[0]
+
+    dc1, dc2, dc3 = st.columns(3)
+    with dc1:
+        st.markdown("#### 📋 Product Identity")
+        st.write(f"**Name:** {prod['product_detail']}")
+        st.write(f"**Category:** {prod['product_category']}")
+        st.write(f"**Type:** {prod['product_type']}")
+        st.write(f"**Tier:** {prod['performance_tier']}")
+        st.write(f"**Pareto Class:** {prod['pareto_class']}")
+
+    with dc2:
+        st.markdown("#### 💰 Revenue Metrics")
+        st.metric("Total Revenue", f"${prod['total_revenue']:,.2f}")
+        st.metric("Revenue Share", f"{prod['revenue_share_pct']:.2f}%")
+        st.metric("Revenue Rank", f"#{int(prod['revenue_rank'])}")
+        st.metric("Avg Unit Price", f"${prod['avg_unit_price']:.2f}")
+
+    with dc3:
+        st.markdown("#### 📦 Volume Metrics")
+        st.metric("Units Sold", f"{int(prod['total_units_sold']):,}")
+        st.metric("Volume Rank", f"#{int(prod['volume_rank'])}")
+        st.metric("Transactions", f"{int(prod['transaction_count']):,}")
+        st.metric("Efficiency Score", f"{prod['efficiency_score']:.3f}")
+
     st.markdown("---")
-    
-    # Download buttons
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        csv = filtered_df.to_csv(index=False)
+
+    da1, da2 = st.columns(2)
+
+    with da1:
+        st.markdown("#### ⭐ Category Positioning")
+        cat_group = df[df["product_category"] == prod["product_category"]]
+        cat_avg_eff = cat_group["efficiency_score"].mean()
+        percentile = (df["efficiency_score"] <= prod["efficiency_score"]).sum() / len(df) * 100
+        cat_rank = int(cat_group["total_revenue"].rank(ascending=False)[df[df["product_detail"] == product_select].index[0]])
+
+        st.metric("Category Avg Efficiency", f"{cat_avg_eff:.3f}")
+        st.metric("Global Efficiency Percentile", f"{percentile:.0f}th")
+        st.metric("Rank Within Category", f"#{cat_rank} of {len(cat_group)}")
+
+    with da2:
+        st.markdown("#### 🏪 Store-Level Revenue Breakdown")
+        store_vals = {
+            store: float(prod.get(store_name_to_col[store], 0))
+            for store in store_name_to_col
+        }
+        store_bk = pd.DataFrame({
+            "Store": list(store_vals.keys()),
+            "Revenue": list(store_vals.values()),
+        })
+        fig = px.bar(
+            store_bk, x="Store", y="Revenue",
+            color="Store",
+            color_discrete_sequence=["#6F4E37", "#D2691E", "#DEB887"],
+            text=store_bk["Revenue"].apply(lambda x: f"${x:,.2f}"),
+            labels={"Revenue": "Revenue ($)"},
+        )
+        fig.update_traces(textposition="outside")
+        fig.update_layout(
+            height=300, showlegend=False,
+            yaxis_tickprefix="$",
+            paper_bgcolor="#FFFDF8", plot_bgcolor="#FFFDF8",
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+# ══════════════════════════════════════════════════════════════════
+# TAB 7 — DATA EXPORT
+# ══════════════════════════════════════════════════════════════════
+with tab7:
+    st.subheader("Consolidated Product Analysis Data & Exports")
+    st.markdown("Complete dataset with all analytical metrics — sortable, filterable, downloadable.")
+
+    disp = (
+        filtered_df[[
+            "product_detail", "product_category", "product_type", "performance_tier",
+            "total_revenue", "revenue_share_pct", "revenue_rank",
+            "total_units_sold", "volume_rank", "efficiency_score",
+            "pareto_class", "transaction_count", "avg_unit_price",
+        ]]
+        .copy()
+        .sort_values("total_revenue", ascending=False)
+    )
+    disp.columns = [
+        "Product", "Category", "Type", "Tier",
+        "Revenue ($)", "Share %", "Rev Rank",
+        "Units Sold", "Vol Rank", "Efficiency",
+        "Pareto", "Transactions", "Avg Price ($)",
+    ]
+    st.dataframe(disp, hide_index=True, height=560, use_container_width=True)
+
+    st.markdown("---")
+    st.markdown("#### 📥 Download Options")
+
+    dl1, dl2, dl3 = st.columns(3)
+
+    with dl1:
+        csv_filtered = filtered_df.to_csv(index=False).encode("utf-8")
         st.download_button(
             label="📥 Download Filtered Data (CSV)",
-            data=csv,
-            file_name="afficionado_product_analysis_filtered.csv",
+            data=csv_filtered,
+            file_name="afficionado_filtered_analysis.csv",
             mime="text/csv",
-            help="Download filtered products as CSV"
-        )
-    
-    with col2:
-        csv_all = df.to_csv(index=False)
-        st.download_button(
-            label="📥 Download All Data (CSV)",
-            data=csv_all,
-            file_name="afficionado_product_analysis_complete.csv",
-            mime="text/csv",
-            help="Download all 80 products as CSV"
         )
 
-# ============================================================================
+    with dl2:
+        csv_all = df.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label="📥 Download Full Dataset (CSV)",
+            data=csv_all,
+            file_name="afficionado_complete_analysis.csv",
+            mime="text/csv",
+        )
+
+    with dl3:
+        script_dir = Path(__file__).parent if "__file__" in dir() else Path.cwd()
+        docx_path = script_dir / "RESEARCH_PAPER_MANUSCRIPT_20PAGE.docx"
+        if not docx_path.exists():
+            docx_path = Path("RESEARCH_PAPER_MANUSCRIPT_20PAGE.docx")
+
+        try:
+            if docx_path.exists():
+                with open(docx_path, "rb") as fh:
+                    st.download_button(
+                        label="📄 Download Research Paper (DOCX)",
+                        data=fh.read(),
+                        file_name="Afficionado_Research_Paper.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    )
+            else:
+                st.info("ℹ️ Research paper DOCX not found. Run `generate_paper.py` to create it.")
+        except Exception as exc:
+            st.warning(f"Could not load research paper: {exc}")
+
+# ─────────────────────────────────────────────────────────────────
 # FOOTER
-# ============================================================================
+# ─────────────────────────────────────────────────────────────────
 st.markdown("---")
 st.markdown(
-    "<div style='text-align: center; color: #999; font-size: 0.85em;'>"
-    "Afficionado Coffee Roasters | Product Portfolio Analysis Dashboard<br/>"
-    "Comprehensive performance metrics and data-driven recommendations"
+    "<div class='footer-text'>"
+    "<b>Afficionado Coffee Roasters</b> | Product Optimization & Revenue Contribution Analysis<br/>"
+    "Data Science Internship Project — <i>Unified Mentor</i> | "
+    "Published in <i>Journal of Universal Applied Research</i> (ISSN: Peer-Reviewed)<br/>"
+    "Dashboard built with Streamlit · Plotly · Pandas · SciPy &nbsp;|&nbsp; "
+    "Submit at: submission@scriptspace.org &nbsp;|&nbsp; "
+    "<a href='https://universalappliedresearch.com/' target='_blank' style='color:#6F4E37;'>universalappliedresearch.com</a>"
     "</div>",
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )

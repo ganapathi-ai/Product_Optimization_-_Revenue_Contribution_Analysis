@@ -44,11 +44,13 @@ wheels/
 # Data (if needed to exclude large files, but typically included for this app)
 # data/
 
-# Generated files
-*.docx
+# Generated files — exclude temporary/scratch files
+# NOTE: RESEARCH_PAPER_MANUSCRIPT_20PAGE.docx is intentionally tracked
 *.xlsx
 *.log
 test_fix.py
+paper_audit.py
+raw_verify.py
 
 # OS
 Thumbs.db
