@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-The Streamlit application implements a professional-grade interactive analytics dashboard for product optimization analysis. The implementation consists of **706 lines of clean, modular Python code** across **7 tabbed modules**, with **10 interactive Plotly visualizations**, **25 KPI metrics**, and **8 dynamic filters**.
+The Streamlit application implements a professional-grade interactive analytics dashboard for product optimization analysis. The implementation consists of a single Streamlit application organized across **7 tabbed modules**, with **10 interactive Plotly visualizations**, **25 KPI metrics**, and **8 dynamic filters**.
 
 ---
 
@@ -146,8 +146,8 @@ def load_data():
 |----------|------|-----------------|----------|
 | Q1 | Hero Zone | High volume, High revenue | Maintain & promote |
 | Q2 | Premium | Low volume, High revenue | Market expansion |
-| Q3 | Volume Drivers | High volume, Low revenue | Pricing review |
-| Q4 | Rationalization | Low volume, Low revenue | Consider removal |
+| Q3 | Rationalization | Low volume, Low revenue | Consider removal |
+| Q4 | Volume Drivers | High volume, Low revenue | Pricing review |
 
 **Features:**
 - Median-based quadrant boundaries (volume & revenue)
@@ -223,15 +223,12 @@ def load_data():
 **Components:**
 - Complete sortable/filterable DataFrame (13 columns)
 - Filtered Data CSV Download
-- Complete Dataset CSV Download
-- Research Paper DOCX Download
 
 **Export Features:**
 - CSV format for filtered products
-- CSV format for all 80 products
-- 20-page MS Word research manuscript
+- On-screen export table for filtered products
 - Cloud-compatible file handling
-- Graceful error handling for missing files
+- Clean browser-based CSV download flow
 
 ---
 
@@ -319,18 +316,6 @@ store_name_to_col = {
 ---
 
 ## 7. Error Handling & Cloud Compliance
-
-### File Operations Safety
-```python
-try:
-    if docx_path.exists():
-        with open(docx_path, "rb") as file:
-            st.download_button(...)
-    else:
-        st.info("Research paper not available...")
-except Exception as e:
-    st.warning(f"Could not load: {str(e)}")
-```
 
 ### Path Resolution Fallback
 ```python
@@ -454,7 +439,7 @@ python-docx>=1.0.0
 
 ## 13. Conclusion
 
-The Streamlit application represents a **production-ready, cloud-compliant analytics platform** that successfully implements all PRD requirements. With 706 lines of well-organized code, comprehensive error handling, and 7 specialized modules, the dashboard delivers enterprise-grade product analytics for Afficionado Coffee Roasters.
+The Streamlit application represents a **production-ready, cloud-compliant analytics platform** that successfully implements all PRD requirements. With comprehensive error handling and 7 specialized modules, the dashboard delivers enterprise-grade product analytics for Afficionado Coffee Roasters.
 
 **Key Achievements:**
 - ✓ 100% PRD compliance

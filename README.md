@@ -102,8 +102,8 @@ The project applies established analytical frameworks to optimize product portfo
 | Location | Revenue | Performance |
 |----------|---------|------------|
 | **Hell's Kitchen** | $236,511 | Highest absolute revenue |
-| **Astoria** | $231,744 | Consistent performer |
-| **Lower Manhattan** | $230,557 | Highest per-transaction average |
+| **Astoria** | $232,244 | Consistent performer |
+| **Lower Manhattan** | $230,057 | Highest per-transaction average |
 
 **Variance:** < 3% across locations (highly consistent)
 
@@ -179,8 +179,8 @@ pip install -r requirements.txt
 ### Run Analysis
 
 ```bash
-# Execute product optimization analysis
-python product_optimization_analysis.py
+# Regenerate the research manuscript
+python generate_paper.py
 ```
 
 
@@ -198,7 +198,7 @@ Then open: **http://localhost:8501**
 
 ```bash
 # Create comprehensive analysis document
-python generate_consolidated_analysis.py
+python generate_paper.py
 ```
 
 ---
@@ -230,8 +230,8 @@ Afficionado_Coffee_Roasters/
 │   └── .streamlit/config.toml
 │
 └── CORE SCRIPTS
-    ├── product_optimization_analysis.py
-    └── generate_consolidated_analysis.py
+    ├── generate_paper.py
+    └── streamlit_app.py
 ```
 
 ---
@@ -428,6 +428,3 @@ Afficionado_Coffee_Roasters/
 **License:** Open Source
 
 ---
-
-
-

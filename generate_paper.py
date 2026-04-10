@@ -34,14 +34,14 @@ LOW_SHARE_PRODUCTS   = 22            # individual rev share < 0.5% (from SUMMARY
 TOP80_REVENUE        = 553791.63     # actual sum of Top_80% products
 LONGTAIL_REVENUE     = 145020.70     # actual sum of Long_Tail products
 HERO_REVENUE         = 162265.75     # sum of all 9 Hero-tier products (verified from CSV)
-TOP80_SHARE          = 79.24         # actual revenue share %
-LONGTAIL_SHARE       = 20.77
+TOP80_SHARE          = round(TOP80_REVENUE / TOTAL_REVENUE * 100, 2)
+LONGTAIL_SHARE       = round(LONGTAIL_REVENUE / TOTAL_REVENUE * 100, 2)
 TOP_PRODUCT_NAME     = "Sustainably Grown Organic Lg"
 TOP_PRODUCT_REVENUE  = 21151.75
 TOP_PRODUCT_SHARE    = 3.03
 TOP10_SHARE          = 25.38
 PEARSON_R            = 0.8468        # scipy.stats.pearsonr(units_sold, total_revenue), n=80
-MED_VOL              = 3629          # median total_units_sold (exact from CSV)
+MED_VOL              = 3629.5        # exact median total_units_sold from CSV
 MED_REV              = 9225.0        # median total_revenue
 
 # Category data  (CATEGORY_SUMMARY.csv)
@@ -178,7 +178,7 @@ def build():
         "A Data-Driven Framework for the Specialty Coffee Retail Industry",
         size=16, bold=True, sa=14)
     center(doc, "Afficionado Coffee Roasters -- Multi-Store Product Portfolio Study", size=13, sa=12)
-    center(doc, "Data Science Internship Project | Unified Mentor", size=11, sa=6)
+    center(doc, "Research Manuscript", size=11, sa=6)
     center(doc, "Submitted to: Journal of Universal Applied Research", size=11, sa=4)
     center(doc,
         "Subject Areas: Data Science, AI & Emerging Technologies | Management & Business Economics | "
@@ -206,8 +206,8 @@ def build():
         f"Using a transactional POS dataset of {TOTAL_TRANSACTIONS:,} customer transactions across "
         f"{TOTAL_PRODUCTS} products and {TOTAL_CATEGORIES} categories, a multi-dimensional analytical "
         "framework was developed and operationalized through an interactive Streamlit dashboard. "
-        "The framework integrates: (i) a composite product Efficiency Score combining revenue rank, "
-        "volume rank, and transaction frequency; (ii) Pareto concentration analysis; "
+        "The framework integrates: (i) a composite product Efficiency Score combining normalized "
+        "revenue and normalized sales volume; (ii) Pareto concentration analysis; "
         "(iii) median-based quadrant segmentation; and (iv) store-level comparative benchmarking.",
         indent=True)
 
@@ -274,7 +274,7 @@ def build():
         sfont(r, size=12)
 
     body(doc,
-        "The findings are operationalized through an 7-tab interactive Streamlit web dashboard "
+        "The findings are operationalized through a 7-tab interactive Streamlit web dashboard "
         "supporting real-time filtering by category, product type, store, performance tier, Top-N, "
         "revenue range, volume range, and efficiency score. All code, data, and the dashboard are "
         "publicly available on GitHub for full reproducibility.", indent=True, sa=10)
@@ -347,8 +347,8 @@ def build():
 
     heading(doc, "3.1 Dataset Description and Provenance", size=12, bold=True, sb=8)
     body(doc,
-        "The Afficionado Coffee Roasters POS dataset was sourced from the Unified Mentor "
-        "Data Science Internship Programme. The raw transactional data was pre-processed and "
+        "The Afficionado Coffee Roasters POS dataset was sourced from the company's point-of-sale records. "
+        "The raw transactional data was pre-processed and "
         "aggregated into a product-level consolidated analytical file. The raw dataset comprises "
         "individual transaction records within the year 2025, "
         "spanning three New York City retail locations. Table 1 summarises the dataset characteristics.",
@@ -369,7 +369,7 @@ def build():
         ("Average Transaction Value",    f"${AVG_TXN_VALUE} (computed: $4.6864)"),
         ("Analysis Period",              "2025 (transactional POS records)"),
         ("Analytical Columns (derived)", "25 per product"),
-        ("Performance Tiers",           "Hero (ES>=0.80), High (0.60-0.79), Medium (0.30-0.59), Low (<0.30)"),
+        ("Performance Tiers",           "Hero (ES>=0.80), High (0.50-0.79), Medium (0.20-0.49), Low (<0.20)"),
         ("Pareto Classes",              "Top_80% (42 products), Long_Tail (38 products)"),
     ]:
         table_row(t1, r)
@@ -389,15 +389,15 @@ def build():
         "(Step 5) Cumulative revenue and cumulative revenue percentage were computed by summing ranked "
         "revenue in order, enabling Pareto classification. "
         "(Step 6) Pareto class was assigned as 'Top_80%' for the first 42 products (cumulative "
-        "revenue reaching 79.24% of portfolio total) and 'Long_Tail' for the remaining 38. "
+        "revenue reaching 79.25% of portfolio total) and 'Long_Tail' for the remaining 38. "
         "(Step 7) Category-level and type-level aggregates were computed by grouping product-level data. "
         "The final consolidated CSV contains 80 product records, 25 analytical columns, "
-        "and was validated against store-level POS summary reports.", indent=True)
+        "and was cross-checked against the raw transaction totals and derived summary tables.", indent=True)
 
     heading(doc, "3.3 Composite Efficiency Score (ES) Model", size=12, bold=True, sb=8)
     body(doc,
-        "The Efficiency Score (ES) is a pre-computed metric provided in the consolidated dataset, "
-        "prepared by Unified Mentor using transaction-level raw data. The formula, documented in "
+        "The Efficiency Score (ES) is a pre-computed metric provided in the consolidated dataset "
+        "and independently reproducible from the transaction-level raw data. The formula, documented in "
         "the project's Transformation Logic specification, combines revenue performance (weighted 60%) "
         "and volume performance (weighted 40%), both normalised relative to the portfolio maximum:",
         indent=True)
@@ -428,7 +428,7 @@ def build():
     body(doc,
         "Products were sorted in descending order of total_revenue and assigned cumulative revenue "
         "percentages. Products were classified as 'Top_80%' if their cumulative revenue fell within "
-        "the first 79.24% of portfolio revenue (the point at which the 42nd product was added), "
+        "the first 79.25% of portfolio revenue (the point at which the 42nd product was added), "
         "and 'Long_Tail' for all subsequent products. Separately, the SUMMARY_STATISTICS report "
         "identifies 22 products with individual revenue shares below 0.5% -- a stricter threshold "
         "identifying the most marginal long-tail contributors within the broader 38-product Long_Tail "
@@ -437,7 +437,7 @@ def build():
     heading(doc, "3.5 Quadrant Analysis Methodology", size=12, bold=True, sb=8)
     body(doc,
         f"Popularity-revenue quadrants were constructed using dataset median values as boundaries: "
-        f"median units sold = {MED_VOL:,}, median revenue = ${MED_REV:,.2f}. "
+        f"median units sold = {MED_VOL:,.1f}, median revenue = ${MED_REV:,.2f}. "
         "Products above both medians were assigned to Q1 (Hero Zone); below volume but above revenue "
         "median to Q2 (Premium); below both to Q3 (Rationalization); and above volume but below "
         "revenue median to Q4 (Volume Drivers). Quadrant counts: Q1=38, Q2=2, Q3=38, Q4=2.",
@@ -478,7 +478,7 @@ def build():
         f"in the consolidated dataset). Product-level revenue ranges from ${21151.75:,.2f} "
         f"(Sustainably Grown Organic Lg, rank=1) to ${755.20:,.2f} (Dark chocolate, rank=80), "
         f"a 28.0x range demonstrating substantial portfolio heterogeneity. "
-        f"Mean product revenue is ${TOTAL_REVENUE/TOTAL_PRODUCTS:,.2f} (${698812.33/80:.2f}). "
+        f"Mean product revenue is ${TOTAL_REVENUE/TOTAL_PRODUCTS:,.2f}. "
         f"Median product revenue is ${MED_REV:,.2f}, substantially below the mean, "
         f"confirming a right-skewed revenue distribution characteristic of long-tail portfolios.",
         indent=True)
@@ -521,7 +521,7 @@ def build():
         f"({TOP_PRODUCT_SHARE}% revenue share) with 4,453 units sold and an efficiency score "
         f"of 0.978 -- the second-highest composite score in the portfolio. "
         f"Dark chocolate Lg achieves the highest efficiency score (0.992) due to its #2 revenue "
-        f"rank combined with the highest volume rank (#2, 4,668 units). "
+        f"rank combined with the second-highest sales volume (4,668 units; volume rank #2). "
         f"The top 10 products collectively account for {TOP10_SHARE}% of total portfolio revenue, "
         f"with all top-5 products classified as Hero-tier (ES > 0.85).", indent=True)
 
@@ -543,7 +543,7 @@ def build():
         f"generate ${LONGTAIL_REVENUE:,.2f} ({LONGTAIL_SHARE}%). "
         f"Within the Long_Tail classification, {LOW_SHARE_PRODUCTS} products each hold an "
         f"individual revenue share below 0.5%, representing the most marginal contributors. "
-        f"This split (52.5% of products driving 79.24% of revenue) represents a modified Pareto "
+        f"This split (52.5% of products driving {TOP80_SHARE}% of revenue) represents a modified Pareto "
         f"pattern: wider than a strict 20/80 split, indicating moderate-to-high revenue "
         f"dispersion rather than extreme hyper-concentration. Table 4 summarises Pareto metrics.",
         indent=True)
@@ -561,7 +561,7 @@ def build():
 
     heading(doc, "4.6 Popularity-Revenue Quadrant Analysis and Correlation", size=12, bold=True, sb=8)
     body(doc,
-        f"Using median boundaries (volume = {MED_VOL:,} units; revenue = ${MED_REV:,.2f}), "
+        f"Using median boundaries (volume = {MED_VOL:,.1f} units; revenue = ${MED_REV:,.2f}), "
         "80 products were distributed across four quadrants: "
         "Q1 Hero Zone (high volume, high revenue) = 38 products; "
         "Q2 Premium (low volume, high revenue) = 2 products; "
@@ -575,7 +575,7 @@ def build():
     body(doc,
         f"Pearson product-moment correlation analysis (n = {TOTAL_PRODUCTS}) reveals a "
         f"strong positive relationship between total units sold and total revenue: "
-        f"r = {PEARSON_R} (95% CI estimated: 0.78-0.90), p < 0.001. "
+        f"r = {PEARSON_R}, p < 0.001. "
         f"The coefficient of determination R2 = {PEARSON_R**2:.4f} ({PEARSON_R**2*100:.2f}%), "
         f"indicating that units sold volume explains approximately {PEARSON_R**2*100:.1f}% of "
         f"the variance in product-level revenue. This strong correlation validates the joint "
@@ -588,13 +588,13 @@ def build():
     body(doc,
         "Table 5 presents store-level performance metrics. Revenue distribution across three "
         "NYC locations is remarkably balanced, with an inter-store revenue range of only "
-        f"${236511.17 - 230057.25:,.2f} ({(236511.17-230057.25)/230057.25*100:.2f}% coefficient "
-        "of variation relative to the lowest store). Hell's Kitchen leads marginally at "
+        f"${236511.17 - 230057.25:,.2f} ({(236511.17-230057.25)/230057.25*100:.2f}% gap "
+        "relative to the lowest-revenue store). Hell's Kitchen leads marginally at "
         f"${236511.17:,.2f} (33.84%), followed by Astoria ${232243.91:,.2f} (33.23%), "
         f"and Lower Manhattan ${230057.25:,.2f} (32.92%). Transaction volume differences "
         "(Hell's Kitchen: 50,735; Astoria: 50,599; Lower Manhattan: 47,782) suggest Lower "
-        "Manhattan achieves a higher revenue per transaction, consistent with its higher "
-        f"store_avg_rev of $4.81 vs. Hell's Kitchen ($4.66) and Astoria ($4.59).",
+        "Manhattan achieves a higher revenue per transaction, consistent with its average "
+        f"revenue per transaction of $4.81 versus Hell's Kitchen ($4.66) and Astoria ($4.59).",
         indent=True)
 
     caption(doc,
@@ -624,18 +624,18 @@ def build():
         "(R1.2) Sustainably Grown Organic Lg (ES=0.978) and Dark chocolate Lg (ES=0.992) "
         "should anchor combo meal deals given their top revenue and volume ranks. "
         "(R1.3) The 33 High-tier products represent a growth tier -- targeted upselling scripts "
-        "for baristas (e.g., 'Would you like to upgrade to our Large?') could lift their "
-        "revenue_share_pct by an estimated 0.3-0.5 percentage points.",
+        "for baristas (e.g., 'Would you like to upgrade to our Large?') should be tested as a "
+        "structured upselling intervention for this group.",
         indent=True)
 
     heading(doc, "5.2 RO2: Pareto Rationalization Recommendations", size=12, bold=True, sb=8)
     body(doc,
         "RO2 is addressed by Section 4.5. The 38 Long_Tail products generating $145,020.70 "
-        "(20.76% of revenue) warrant stratified review. "
-        "(R2.1) Immediate review candidates: the 23 Low-tier products (ES < 0.30) with "
-        "individual revenue shares below 0.32% each. Recommended pilot: remove the bottom "
-        "5 products by efficiency score (Dark chocolate, Spicy Eye Opener Chai, Earl Grey, "
-        "Lemon Grass, Traditional Blend Chai -- all Loose Tea Rg variants) for a 3-month "
+        f"({LONGTAIL_SHARE}% of revenue) warrant stratified review. "
+        "(R2.1) Immediate review candidates include the 23 Low-tier products (ES < 0.20). "
+        "Recommended pilot: review the bottom 5 products by efficiency score "
+        "(Dark chocolate, Spicy Eye Opener Chai, Earl Grey, Guatemalan Sustainably Grown, "
+        "and Lemon Grass) over a 3-month "
         "trial and monitor revenue and customer satisfaction impact. "
         "(R2.2) Flavours category ($8,408.80, 1.20% share) generates high transaction volumes "
         "(10,511 units) at $0.80/unit. These are add-on items; their value lies in "
@@ -665,8 +665,8 @@ def build():
         "The composite Efficiency Score (ES) used in this study employs a "
         "weighted normalisation formula: ES = 0.6 x (Revenue/Max_Revenue) + "
         "0.4 x (Volume/Max_Volume), as documented in Section 3.3. "
-        "These weights were assigned by Unified Mentor during dataset preparation "
-        "and reflect a revenue-first prioritisation philosophy. "
+        "These weights reflect a revenue-first prioritisation philosophy embedded in the "
+        "consolidated analytical dataset. "
         "Note: an alternative rank-based weighting scheme "
         "(0.50 revenue, 0.30 volume, 0.20 transactions) has been discussed in some "
         "formulations of similar models; this study does not employ that variant. "
@@ -687,10 +687,10 @@ def build():
         "(L3) Cost data (COGS, labour) is unavailable; profitability cannot be computed -- "
         "revenue is used as a proxy for contribution. "
         "(L4) The Pareto classification boundary is sensitive to the choice of threshold; "
-        "the 79.24% cumulative revenue point (not exactly 80.00%) results from discrete product "
-        "boundaries in a finite portfolio. "
-        "(L5) The dataset predates the COVID-19 pandemic; results may not generalize to "
-        "post-2020 demand patterns.",
+        f"the {TOP80_SHARE}% cumulative revenue point (not exactly 80.00%) results from discrete "
+        "product boundaries in a finite portfolio. "
+        "(L5) The dataset represents a single coffee chain operating in one city; results may not "
+        "generalize directly to other geographies, retail formats, or product portfolios.",
         indent=True, sa=10)
 
     # ── 6. CONCLUSION ───────────────────────────────────────────
@@ -709,7 +709,7 @@ def build():
 
     body(doc,
         f"Key scientific contributions include: (1) Empirical validation of a modified Pareto "
-        f"pattern in specialty coffee retail (52.5%/79.24% vs. the theoretical 20/80); "
+        f"pattern in specialty coffee retail (52.5%/{TOP80_SHARE}% vs. the theoretical 20/80); "
         f"(2) a statistically validated strong positive correlation between units sold and revenue "
         f"(r = {PEARSON_R}, R2 = {PEARSON_R**2:.4f}, p < 0.001); "
         f"(3) a replicable composite Efficiency Score methodology deployable on any "
