@@ -1,0 +1,10 @@
+product_category,category_revenue,category_units_sold,unique_products,category_transactions,category_revenue_share_pct,avg_revenue_per_product
+Coffee,269952.45,89250,21,58416,38.63,12854.88
+Tea,196405.95,69737,16,45449,28.11,12275.37
+Bakery,82315.64,23214,11,22796,11.78,7483.24
+Drinking Chocolate,72416.0,17457,4,11468,10.36,18104.0
+Coffee beans,40085.25,1828,10,1753,5.74,4008.52
+Branded,13607.0,776,3,747,1.95,4535.67
+Loose Tea,11213.599999999999,1210,8,1210,1.6,1401.7
+Flavours,8408.800000000001,10511,4,6790,1.2,2102.2
+Packaged Chocolate,4407.64,487,3,487,0.63,1469.21

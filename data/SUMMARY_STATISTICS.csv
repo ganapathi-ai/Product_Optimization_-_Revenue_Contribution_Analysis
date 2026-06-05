@@ -1,0 +1,13 @@
+Metric,Value
+Total Revenue,"$698,812.33"
+Total Transactions,"149,116"
+Total Products,80
+Total Categories,9
+Total Stores,3
+Avg Transaction Value,$4.69
+Top Product Revenue Share,3.03%
+Top 10 Products Revenue Share,25.38%
+Products for 80% Revenue (Pareto),42
+Long-Tail Products (<0.5% share),22
+Hero Products (efficiency >0.8),9
+Low Products (efficiency <0.2),23
